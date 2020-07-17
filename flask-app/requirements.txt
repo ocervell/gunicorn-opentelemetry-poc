@@ -9,5 +9,11 @@ opentelemetry-api
 opentelemetry-sdk
 opentelemetry-ext-flask
 opentelemetry-ext-requests
-opentelemetry-ext-otcollector
 
+# DEPRECATED: opentelemetry-ext-otcollector
+
+opentelemetry-ext-otlp # span export to OTLP collector
+opentelemetry-ext-opencensusexporter # span + metrics export to OTLP collector
+
+opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
+opentelemetry-exporter-cloud-trace # trace export to Cloud Trace

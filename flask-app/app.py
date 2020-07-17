@@ -2,8 +2,6 @@ import config
 import requests
 from flask import Flask
 from opentelemetry import trace, metrics
-from opentelemetry.ext.otcollector.metrics_exporter import CollectorMetricsExporter
-from opentelemetry.ext.otcollector.trace_exporter import CollectorSpanExporter
 from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.ext.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -11,14 +9,28 @@ from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.sdk.metrics.export.controller import PushController
 
+# Method 1: Export to OT collector
+#from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
+#from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
+#span_exporter = OpenCensusSpanExporter(service_name="basic-service", endpoint="localhost:55678")
+#exporter = OpenCensusMetricsExporter(
+#    service_name="basic-service", endpoint="localhost:55678")
+
+# Method 2: Export to Cloud Ops
+from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+span_exporter = CloudTraceSpanExporter()
+exporter = CloudMonitoringMetricsExporter()
+
+
 # Metrics
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__, True)
-exporter = CollectorMetricsExporter(endpoint="localhost:55678")
 controller = PushController(meter, exporter, 5)
 
+
+
 # Traces
-span_exporter = CollectorSpanExporter(endpoint="localhost:55678")
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))

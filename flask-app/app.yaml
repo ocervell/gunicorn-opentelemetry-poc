@@ -14,10 +14,14 @@ spec:
       name: flask-app-tutorial
       labels:
         name: flask-app-tutorial
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '9102'
+        prometheus.io/path: '/metrics'
     spec:
       containers:
         - name: flask-app-tutorial
-          image: gcr.io/rnm-datadog-sd/flask-app:v1.2
+          image: gcr.io/rnm-datadog-sd/flask-app:v1.3
           ports:
             - containerPort: 8080
           resources:
