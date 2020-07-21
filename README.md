@@ -31,7 +31,7 @@ kubectl apply -f ot-agent.yaml
 
 To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource. This will effectively update the OT configuration live.
 
-## Deploy the loadtester
+### Deploy the loadtester
 ```
 cd loadtester
 gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION>
