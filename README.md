@@ -31,5 +31,17 @@ kubectl apply -f ot-agent.yaml
 
 To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource. This will effectively update the OT configuration live.
 
+## Deploy the loadtester
+```
+cd loadtester
+gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION>
+kubectl apply -f k8s/locust_master_controller.yaml
+kubectl apply -f k8s/locust_master_service.yaml
+```
+Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
+```
+kubectl apply -f k8s/locust_worker_controller.yaml
+```
+
 ### (Optional) Deploy Prometheus + Zipkin
 If you're not using the Cloud Trace backend for traces or Cloud Monitoring for metrics, you can optionally configure Prometheus and Zipkin using the configuration YAMLs in `ops/prometheus`.
