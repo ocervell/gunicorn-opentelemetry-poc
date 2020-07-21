@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: flask-app-tutorial
-          image: gcr.io/rnm-datadog-sd/flask-app:v1.3
+          image: gcr.io/rnm-datadog-sd/flask-app:v1.5
           ports:
             - containerPort: 8080
           resources:
@@ -39,3 +39,22 @@ spec:
           - containerPort: 9102
           - containerPort: 9125
             protocol: UDP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: flask-app-tutorial
+  name: flask-app-tutorial
+  namespace: default
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster
+  ports:
+  - nodePort: 32424
+    port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    name: flask-app-tutorial
+  sessionAffinity: None

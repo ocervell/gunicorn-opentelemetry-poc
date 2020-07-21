@@ -166,7 +166,14 @@ data:
         source_labels: [__address__]
         replacement: "${1}:10255"
 
-    - job_name: 'kubernetes-pods'
+       
+    - job_name: 'otel-collector'
+      scrape_interval: 10s
+      static_configs:
+      - targets: ['otel-collector:8889']
+      - targets: ['otel-collector:8888']
+    
+    - job_name: kubernetes-pods
       kubernetes_sd_configs:
       - role: pod
       relabel_configs:
