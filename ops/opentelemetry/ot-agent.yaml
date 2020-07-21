@@ -36,7 +36,7 @@ data:
         extensions: [health_check]
         pipelines:
             traces:
-                receivers: [opencensus,prometheus]
+                receivers: [opencensus]
                 processors: [batch, queued_retry]
                 exporters: [stackdriver, logging]
             metrics:
