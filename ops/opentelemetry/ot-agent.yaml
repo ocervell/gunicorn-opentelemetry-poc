@@ -11,7 +11,7 @@ data:
     #loglevel: DEBUG
     receivers:
         opencensus:
-            endpoint: "0.0.0.0:55678"
+            endpoint: "localhost:55678"
         prometheus:
             config:
                 scrape_configs:
@@ -36,11 +36,11 @@ data:
         extensions: [health_check]
         pipelines:
             traces:
-                receivers: [opencensus]
+                receivers: [opencensus,prometheus]
                 processors: [batch, queued_retry]
                 exporters: [stackdriver, logging]
             metrics:
-                receivers: [opencensus]
+                receivers: [opencensus,prometheus]
                 processors: [batch]
                 exporters: [stackdriver, logging]
 

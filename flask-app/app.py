@@ -1,6 +1,7 @@
 import config
 import os
 import requests
+import logging
 from flask import Flask
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
@@ -39,12 +40,12 @@ trace.get_tracer_provider().add_span_processor(
 pid = str(os.getpid())
 staging_labels = {"environment": "staging", "pid": pid}
 requests_counter = meter.create_metric(
-    name="num_orders",
+    name="testcounter",
     description="Number of orders",
     unit="1",
     value_type=int,
     metric_type=Counter,
-    label_keys=("environment","pid",),
+    label_keys=("environment", "pid",),
 )
 
 # Flask application
@@ -55,9 +56,13 @@ RequestsInstrumentor().instrument()
 
 @app.route("/")
 def hello():
+    app.logger.info("Received hello request !")
     requests_counter.add(1, staging_labels)
     requests.get('https://www.google.com')
     return "Hello World!"
 
 if __name__ == "__main__":
+    gunicorn_logger = logging.getLogger('gunicorn.error')
+    app.logger.handlers = gunicorn_logger.handlers
+    app.logger.setLevel(gunicorn_logger.level)
     app.run(host="0.0.0.0", port=config.PORT, debug=config.DEBUG_MODE)

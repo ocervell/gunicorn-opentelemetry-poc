@@ -5,4 +5,4 @@ ADD requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 ADD . /app
 ENV PORT 8080
-CMD ["gunicorn", "app:app", "--config=config.py", "--statsd-host=localhost:9125", "--statsd-prefix=demo.app"]
+CMD ["gunicorn", "app:app", "--config=config.py", "--statsd-host=localhost:9125", "--statsd-prefix=demo.app", "--log-level=debug", "--capture-output"]
