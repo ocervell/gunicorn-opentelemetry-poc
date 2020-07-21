@@ -8,17 +8,15 @@ metadata:
     component: otel-agent-conf
 data:
   otel-agent-config: |
-    #loglevel: DEBUG
     receivers:
         opencensus:
-            endpoint: "localhost:55678"
         prometheus:
             config:
                 scrape_configs:
-                - job_name: statsd_exporter
+                - job_name: "statsd_exporter"
                   scrape_interval: 10s
                   static_configs:
-                  - targets: ["0.0.0.0:9102"]
+                  - targets: ['flask-app-tutorial:9102']
     exporters:
         #uncomment for tier2 architecture
         #otlp:
@@ -81,6 +79,8 @@ spec:
         ports:
         - containerPort: 55680 # Default OpenTelemetry receiver port.
         - containerPort: 8888  # Agent metrics.
+        - containerPort: 55678 # OpenCensus receiver port.
+          hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to 0.0.0.0:55678.
         volumeMounts:
         - name: otel-agent-config-vol
           mountPath: /conf

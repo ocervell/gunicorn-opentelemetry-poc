@@ -21,9 +21,10 @@ spec:
     spec:
       containers:
         - name: flask-app-tutorial
-          image: gcr.io/rnm-datadog-sd/flask-app:v2.1
+          image: gcr.io/rnm-datadog-sd/flask-app:v3.0
           ports:
             - containerPort: 8080
+            - containerPort: 55678
           resources:
             requests:
               memory: 256Mi
@@ -32,9 +33,19 @@ spec:
           env:
             - name: DEBUG_MODE
               value: "1"
+
+            - name: OTEL_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
+
+            - name: OTEL_AGENT_ENDPOINT
+              value: $(OTEL_AGENT_HOST):55678
+
         - name: statsd-exporter
           image: prom/statsd-exporter
-          args: ["--log.level=info"]
+          args: ["--log.level=debug"]
           imagePullPolicy: Always
           ports:
           - containerPort: 9102
@@ -52,10 +63,18 @@ spec:
   type: LoadBalancer
   externalTrafficPolicy: Cluster
   ports:
-  - nodePort: 32424
-    port: 80
+  - name: app
+    nodePort: 32424
     protocol: TCP
+    port: 80
     targetPort: 8080
+
+  # this should not be needed to expose externally - make another service
+  - name: statsd-metrics
+    nodePort: 32425
+    protocol: TCP
+    port: 9102
+    targetPort: 9102
   selector:
     name: flask-app-tutorial
   sessionAffinity: None
