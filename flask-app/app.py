@@ -35,14 +35,15 @@ trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
-staging_labels = {"environment": "staging"}
+pid = os.getpid()
+staging_labels = {"environment": "staging", "pid": pid}
 requests_counter = meter.create_metric(
     name="testcounter",
     description="A test counter (custom metrics)",
     unit="1",
     value_type=int,
     metric_type=Counter,
-    label_keys=("environment",),
+    label_keys=("environment", "pid",),
 )
 
 # Flask application
