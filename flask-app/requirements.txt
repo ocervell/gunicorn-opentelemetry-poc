@@ -9,14 +9,5 @@ opentelemetry-api
 opentelemetry-sdk
 opentelemetry-ext-flask
 opentelemetry-ext-requests
-<<<<<<< HEAD
 opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
 opentelemetry-exporter-cloud-trace # trace export to Cloud Trace
-=======
-opentelemetry-ext-opencensusexporter # OC span + metrics export to OTLP collector
-opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
-opentelemetry-exporter-cloud-trace # trace export to Cloud Trace
-
-# DEPRECATED: opentelemetry-ext-otcollector
-# FUTURE OC EXPORTER: opentelemetry-ext-otlp
->>>>>>> agentless-setup
