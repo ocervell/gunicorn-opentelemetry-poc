@@ -14,15 +14,16 @@ from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
 from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
-span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial", endpoint=OTEL_AGENT_ENDPOINT)
-exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial", endpoint=OTEL_AGENT_ENDPOINT)
+span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial",
+                                       endpoint=OTEL_AGENT_ENDPOINT)
+exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
+                                     endpoint=OTEL_AGENT_ENDPOINT)
 
 # Method 2: Export to Cloud Ops (WON'T WORK WITH GUNICORN)
 #from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 #from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 #span_exporter = CloudTraceSpanExporter()
 #exporter = CloudMonitoringMetricsExporter()
-
 
 # Metrics
 metrics.set_meter_provider(MeterProvider())
@@ -43,7 +44,10 @@ requests_counter = meter.create_metric(
     unit="1",
     value_type=int,
     metric_type=Counter,
-    label_keys=("environment", "pid",),
+    label_keys=(
+        "environment",
+        "pid",
+    ),
 )
 
 # Flask application
@@ -56,6 +60,7 @@ gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 
+
 @app.route("/")
 def hello():
     app.logger.info("Received hello request !")
@@ -63,6 +68,7 @@ def hello():
     app.logger.debug("Counter was incremented.")
     requests.get('https://www.google.com')
     return "Hello World!"
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=config.PORT, debug=config.DEBUG_MODE)
