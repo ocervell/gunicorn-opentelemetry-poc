@@ -1,16 +1,24 @@
 # Gunicorn Flask application with OpenTelemetry instrumentation
 
-This repository is a POC application to demonstrate OpenTelemetry instrumentation for a gunicorn application running on GKE, including framework metrics and traces as well as custom metrics and traces.
-
-The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying the ot-agent.yaml configuration should be straightforward to adapt this example to other metrics or trace backends.
+This repository is a POC application to demonstrate OpenTelemetry instrumentation for a `gunicorn` application running on Google Kubernetes engine.
 
 In this design:
 
--   Prometheus is not used.
--   OpenTelemetry SDK uses OpenCensus exporters to export custom metrics and spans to the OT agent.
--   OpenTelemetry agent is deployed as a daemonset and configured to export to Cloud Trace and Cloud Monitoring, as well as to scrape statsd endpoint for Gunicorn metrics.
+-   `gunicorn` is configured to forward framework metrics to a Prometheus `statsd-exporter` (sidecar container).
 
-This branch can deploy the architecture below:
+-   `OpenTelemetry` agent is deployed as a `daemonset` and configured with:
+
+    -   A Prometheus `receiver` to scrape the `statsd-exporter` metrics (drop-in replacement for a full-fledged Prometheus instance).
+
+    -   An OpenCensus `receiver` to receive the application custom metrics sent via the SDK.
+
+    -   A `Cloud Trace` and `Cloud Monitoring` `exporter` to ship metrics and traces to Cloud Operations.
+
+-   `OpenTelemetry SDK` for Python is used within the app and `OpenCensusMetricsExporter` and `OpenCensusSpanExporter` are configured to export custom metrics and spans to the OpenTelemetry agent.
+
+-   `Prometheus` and `prometheus-to-sd` are not used.
+
+The architecture is as follows:
 
 ![](gke_ot_1.png)
 
