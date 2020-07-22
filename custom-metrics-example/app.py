@@ -22,11 +22,9 @@ from opentelemetry import metrics
 from opentelemetry.ext.opencensusexporter.metrics_exporter import (
     OpenCensusMetricsExporter, )
 from opentelemetry.sdk.metrics import Counter, MeterProvider
+from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 
-OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
-exporter = OpenCensusMetricsExporter(service_name="custom-metrics-example",
-                                     endpoint=OTEL_AGENT_ENDPOINT)
-
+exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 5)

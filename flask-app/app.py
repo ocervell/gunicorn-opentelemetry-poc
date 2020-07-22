@@ -10,21 +10,11 @@ from opentelemetry.ext.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
+from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
+from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
 
-# Method 1: Export to OT collector
-from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
-from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
-OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
-span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial",
-                                       endpoint=OTEL_AGENT_ENDPOINT)
-exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
-                                     endpoint=OTEL_AGENT_ENDPOINT)
-
-# Method 2: Export to Cloud Ops
-# from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
-# from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-# span_exporter = CloudTraceSpanExporter()
-# exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
+span_exporter = CloudTraceSpanExporter()
+exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
 
 # Metrics
 metrics.set_meter_provider(MeterProvider())
@@ -37,18 +27,14 @@ trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
-pid = os.getpid()
-staging_labels = {"environment": "staging", "pid": pid}
+staging_labels = {"environment": "staging"}
 requests_counter = meter.create_metric(
     name="hello_requests_otagent",
     description="Hello requests count",
     unit="1",
     value_type=int,
     metric_type=Counter,
-    label_keys=(
-        "environment",
-        "pid",
-    ),
+    label_keys=("environment", ),
 )
 
 # Flask application
@@ -60,10 +46,6 @@ RequestsInstrumentor().instrument()
 gunicorn_logger = logging.getLogger('gunicorn.error')
 app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
-app.logger.info(f'Otel agent endpoint: {OTEL_AGENT_ENDPOINT}')
-
-# Test increment custom metric
-app.logger.info('Incrementing start counter ...')
 
 
 @app.route("/")
