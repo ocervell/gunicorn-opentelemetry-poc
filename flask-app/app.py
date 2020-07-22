@@ -14,7 +14,7 @@ from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
 from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
-span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial", endpoint=OTEL_AGENT_ENDPOINT)
+#span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial", endpoint=OTEL_AGENT_ENDPOINT)
 exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial", endpoint=OTEL_AGENT_ENDPOINT)
 
 # Method 2: Export to Cloud Ops (WON'T WORK WITH GUNICORN)
@@ -30,9 +30,9 @@ meter = metrics.get_meter(__name__, True)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
-trace.set_tracer_provider(TracerProvider())
-trace.get_tracer_provider().add_span_processor(
-    BatchExportSpanProcessor(span_exporter))
+#trace.set_tracer_provider(TracerProvider())
+#trace.get_tracer_provider().add_span_processor(
+#    BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
 pid = os.getpid()
@@ -48,8 +48,8 @@ requests_counter = meter.create_metric(
 
 # Flask application
 app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app)
-RequestsInstrumentor().instrument()
+#FlaskInstrumentor().instrument_app(app)
+#RequestsInstrumentor().instrument()
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
