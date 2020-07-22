@@ -26,6 +26,22 @@ The architecture is as follows:
 
 The installation steps below assume you already have a running GKE cluster.
 
+### Deploy the OpenTelemetry agent
+
+    cd ops/opentelemetry
+    kubectl apply -f ot-agent.yaml
+
+To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource.
+
+### Deploy the custom-metrics-example
+
+    cd custom-metrics-example
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:<VERSION>
+
+Update the version in `app.yaml`, then deploy the example:
+
+    kubectl apply -f app.yaml
+
 ### Build and deploy the gunicorn application
 
     cd flask-app
@@ -34,13 +50,6 @@ The installation steps below assume you already have a running GKE cluster.
 Update the version of the app in `app.yaml`, then deploy the app:
 
     kubectl apply -f app.yaml
-
-### Deploy the OpenTelemetry agent
-
-    cd ops/opentelemetry
-    kubectl apply -f ot-agent.yaml
-
-To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource.
 
 ### Deploy the loadtester
 
