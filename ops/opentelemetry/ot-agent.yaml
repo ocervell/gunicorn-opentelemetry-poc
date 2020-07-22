@@ -38,8 +38,8 @@ data:
                 processors: [batch, queued_retry]
                 exporters: [stackdriver, logging]
             metrics:
-                receivers: [opencensus,prometheus]
-                processors: [batch]
+                receivers: [opencensus]
+                processors: []
                 exporters: [stackdriver, logging]
 
 ---
@@ -80,7 +80,8 @@ spec:
         - containerPort: 55680 # Default OpenTelemetry receiver port.
         - containerPort: 8888  # Agent metrics.
         - containerPort: 55678 # OpenCensus receiver port.
-          hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to 0.0.0.0:55678.
+          hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to <HOST_IP>:55678.
+          protocol: TCP
         volumeMounts:
         - name: otel-agent-config-vol
           mountPath: /conf

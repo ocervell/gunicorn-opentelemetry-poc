@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: flask-app-tutorial
-          image: gcr.io/rnm-datadog-sd/flask-app:v1.0.0-otagent
+          image: gcr.io/rnm-datadog-sd/flask-app:v1.0.4-otagent
           ports:
             - containerPort: 8080
             - containerPort: 55678
@@ -68,13 +68,24 @@ spec:
     protocol: TCP
     port: 80
     targetPort: 8080
+  selector:
+    name: flask-app-tutorial
+  sessionAffinity: None
 
-  # this should not be needed to expose externally - make another service
-  - name: statsd-metrics
-    nodePort: 32425
-    protocol: TCP
-    port: 9102
-    targetPort: 9102
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: statsd-exporter
+  name: statsd-exporter
+  namespace: default
+spec:
+  ports:
+    - name: statsd-metrics
+      protocol: TCP
+      port: 9102
+      targetPort: 9102
   selector:
     name: flask-app-tutorial
   sessionAffinity: None
