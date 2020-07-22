@@ -4,6 +4,12 @@ This repository is a POC application to demonstrate OpenTelemetry instrumentatio
 
 The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying the ot-agent.yaml configuration should be straightforward to adapt this example to other metrics or trace backends.
 
+In this design:
+
+-   Prometheus is not used.
+-   OpenTelemetry SDK uses OpenCensus exporters to export custom metrics and spans to the OT agent.
+-   OpenTelemetry agent is deployed as a daemonset and configured to export to Cloud Trace and Cloud Monitoring, as well as to scrape statsd endpoint for Gunicorn metrics.
+
 This branch can deploy the architecture below:
 
 ![](gke_ot_1.png)
