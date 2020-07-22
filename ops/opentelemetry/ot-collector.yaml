@@ -46,9 +46,13 @@ metadata:
 spec:
   ports:
   - name: otlp # Default endpoint for OpenTelemetry receiver.
-    port: 55680
     protocol: TCP
+    port: 55680
     targetPort: 55680
+  - name: oc # Default endpoint for OpenCensus receiver
+    protocol: TCP
+    port: 55678
+    targetPort: 55678
   - name: metrics # Default endpoint for querying metrics.
     port: 8888
   selector:
