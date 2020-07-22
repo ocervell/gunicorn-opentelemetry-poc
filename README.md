@@ -26,10 +26,8 @@ The installation steps below assume you already have a running GKE cluster.
 
 ### Deploy Prometheus and patch it with prometheus-to-sd
 
-    cd ops/
-    kubectl apply -f ot-agent.yaml
-
-To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource. This will effectively update the OT configuration live.
+    cd ops/prometheus/full
+    # follow instructions in the README.md
 
 ### Deploy the loadtester
 
@@ -41,7 +39,3 @@ To change the configuration of the agent, refer to the configuration [documentat
 Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
 
     kubectl apply -f k8s/locust_worker_controller.yaml
-
-### (Optional) Deploy Prometheus + Zipkin
-
-If you're not using the Cloud Trace backend for traces or Cloud Monitoring for metrics, you can optionally configure Prometheus and Zipkin using the configuration YAMLs in `ops/prometheus`.
