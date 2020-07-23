@@ -21,11 +21,7 @@ spec:
     spec:
       containers:
         - name: flask-app-tutorial
-<<<<<<< HEAD
           image: gcr.io/rnm-datadog-sd/flask-app:v1.0.0-otcloudops
-=======
-          image: gcr.io/rnm-datadog-sd/flask-app:v1.0.0-agentless
->>>>>>> agentless-setup
           ports:
             - containerPort: 8080
             - containerPort: 55678

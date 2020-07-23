@@ -24,7 +24,7 @@ from opentelemetry.ext.opencensusexporter.metrics_exporter import (
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 
-exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
+exporter = CloudMonitoringMetricsExporter()
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
