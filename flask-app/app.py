@@ -19,7 +19,7 @@ exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
 # Metrics
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__, True)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 1)
+metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
 trace.set_tracer_provider(TracerProvider())
