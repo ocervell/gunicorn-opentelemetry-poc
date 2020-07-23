@@ -12,8 +12,7 @@ from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
-from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+
 span_exporter = CloudTraceSpanExporter()
 exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
 
