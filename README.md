@@ -36,7 +36,7 @@ To change the configuration of the agent, refer to the configuration [documentat
 ### Deploy the custom-metrics-example
 
     cd custom-metrics-example
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:<VERSION>
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:<VERSION> .
 
 Update the version in `app.yaml`, then deploy the example:
 
@@ -45,7 +45,7 @@ Update the version in `app.yaml`, then deploy the example:
 ### Build and deploy the gunicorn application
 
     cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:<VERSION>
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:<VERSION> .
 
 Update the version of the app in `app.yaml`, then deploy the app:
 
@@ -54,7 +54,7 @@ Update the version of the app in `app.yaml`, then deploy the app:
 ### Deploy the loadtester
 
     cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION>
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION> .
     kubectl apply -f k8s/locust_master_controller.yaml
     kubectl apply -f k8s/locust_master_service.yaml
 
