@@ -37,7 +37,7 @@ trace.get_tracer_provider().add_span_processor(
 
 # Custom metrics
 pid = os.getpid()
-staging_labels = {"environment": "staging", "pid": pid}
+staging_labels = {"environment": "staging", "pid": str(pid)}
 requests_counter = meter.create_metric(
     name="hello_requests_otagent",
     description="Hello requests count",
