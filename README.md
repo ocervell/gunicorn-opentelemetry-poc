@@ -21,7 +21,7 @@ The installation steps below assume you already have a running GKE cluster.
 ### Build and deploy the gunicorn application
 
     cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:<VERSION>
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:<VERSION> .
 
 Update the version of the app in the `app.yaml`, and then deploy the app to your GKE cluster:
 
@@ -35,7 +35,7 @@ Update the version of the app in the `app.yaml`, and then deploy the app to your
 ### Deploy the loadtester
 
     cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION>
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION> .
     kubectl apply -f k8s/locust_master_controller.yaml
     kubectl apply -f k8s/locust_master_service.yaml
 
