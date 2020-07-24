@@ -1,3 +1,4 @@
 opentelemetry-api
 opentelemetry-sdk
-opentelemetry-ext-opencensusexporter
+#opentelemetry-ext-opencensusexporter
+-e git+https://github.com/aabmass/opentelemetry-python.git@fix-oc-exporter#egg=opentelemetry-ext-opencensusexporter&subdirectory=ext/opentelemetry-ext-opencensusexporter

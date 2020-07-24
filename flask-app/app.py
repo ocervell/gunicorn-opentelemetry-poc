@@ -6,7 +6,6 @@ import time
 from flask import Flask
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
-from opentelemetry.ext.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
@@ -29,7 +28,7 @@ exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
 # Metrics
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__, True)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 1)
+metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
 trace.set_tracer_provider(TracerProvider())
@@ -54,7 +53,6 @@ requests_counter = meter.create_metric(
 # Flask application
 app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
-RequestsInstrumentor().instrument()
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -62,17 +60,12 @@ app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 app.logger.info(f'Otel agent endpoint: {OTEL_AGENT_ENDPOINT}')
 
-# Test increment custom metric
-app.logger.info('Incrementing start counter ...')
-
 
 @app.route("/")
 def hello():
     app.logger.info("Received hello request !")
     requests_counter.add(1, staging_labels)
     app.logger.debug("Counter was incremented.")
-    time.sleep(1)
-    requests.get('https://www.google.com')
     return "Hello World!"
 
 

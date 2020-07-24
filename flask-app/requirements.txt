@@ -8,10 +8,6 @@ werkzeug>=0.15.3
 opentelemetry-api
 opentelemetry-sdk
 opentelemetry-ext-flask
-opentelemetry-ext-requests
-opentelemetry-ext-opencensusexporter # OC span + metrics export to OTLP collector
-
-# DEPRECATED: opentelemetry-ext-otcollector
-# NO SUPPORT FOR METRICS: opentelemetry-ext-otlp # span export to OTLP collector
-# IN OT COLLECTOR: opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
-# IN OT COLLECTOR: opentelemetry-exporter-cloud-trace # trace export to Cloud Trace
+opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
+#opentelemetry-ext-opencensusexporter # OC span + metrics export to OTLP collector
+-e git+https://github.com/aabmass/opentelemetry-python.git@fix-oc-exporter#egg=opentelemetry-ext-opencensusexporter&subdirectory=ext/opentelemetry-ext-opencensusexporter
