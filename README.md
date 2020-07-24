@@ -36,13 +36,13 @@ To change the configuration of the agent, refer to the configuration [documentat
 ### Deploy the custom-metrics-example
 
     cd custom-metrics-example
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest .
     kubectl apply -f app.yaml
 
 ### Build and deploy the gunicorn application
 
     cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
     kubectl apply -f app.yaml
 
 ### Deploy the loadtester
