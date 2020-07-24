@@ -19,12 +19,6 @@ span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial",
 exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
                                      endpoint=OTEL_AGENT_ENDPOINT)
 
-# Method 2: Export to Cloud Ops
-# from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
-# from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-# span_exporter = CloudTraceSpanExporter()
-# exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
-
 # Metrics
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__, True)

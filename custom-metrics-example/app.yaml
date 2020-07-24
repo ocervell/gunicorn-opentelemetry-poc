@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: custom-metrics-example
-          image: gcr.io/rnm-datadog-sd/custom-metrics-example:v1.1.0-otagent
+          image: gcr.io/rnm-datadog-sd/custom-metrics-example:latest
           ports:
             - containerPort: 55678
           resources:
