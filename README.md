@@ -8,11 +8,17 @@ In this design:
 
 -   `OpenTelemetry` agent is deployed as a `daemonset` and configured with:
 
-    -   A Prometheus `receiver` to scrape the `statsd-exporter` metrics (drop-in replacement for a full-fledged Prometheus instance).
-
     -   An OpenCensus `receiver` to receive the application custom metrics sent via the SDK.
 
+
+-   `OpenTelemetry` collector is deployed as a `deployment` to achieve the two-tier architecture, and configured with:
+
+    -   A Prometheus `receiver` to scrape Prometheus exporters metrics (drop-in replacement for a full-fledged Prometheus instance).
+
+    -   An OpenCensus `receiver` to receive the metrics from the agent.
+
     -   A `Cloud Trace` and `Cloud Monitoring` `exporter` to ship metrics and traces to Cloud Operations.
+
 
 -   `OpenTelemetry SDK` for Python is used within the app and `OpenCensusMetricsExporter` and `OpenCensusSpanExporter` are configured to export custom metrics and spans to the OpenTelemetry agent.
 
@@ -26,12 +32,13 @@ The architecture is as follows:
 
 The installation steps below assume you already have a running GKE cluster.
 
-### Deploy the OpenTelemetry agent
+### Deploy the OpenTelemetry agent and collector
 
     cd ops/opentelemetry
     kubectl apply -f ot-agent.yaml
+    kubectl apply -f ot-collector.yaml
 
-To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource.
+To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`' or `ot-collector.yaml` `ConfigMap` resource.
 
 ### Deploy the custom-metrics-example
 
