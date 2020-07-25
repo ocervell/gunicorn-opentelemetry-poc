@@ -10,16 +10,9 @@ data:
   otel-agent-config: |
     receivers:
         opencensus:
-        prometheus:
-            config:
-                scrape_configs:
-                - job_name: "statsd_exporter"
-                  scrape_interval: 10s
-                  static_configs:
-                  - targets: ['flask-app-tutorial:9102']
     exporters:
         logging:
-            loglevel: debug
+            loglevel: info
         opencensus:
           endpoint: "otel-collector:55678"
           insecure: true
