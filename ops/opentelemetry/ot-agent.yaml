@@ -67,11 +67,17 @@ spec:
             cpu: 100m
             memory: 100Mi
         ports:
-        - containerPort: 55680 # Default OpenCensus receiver port.
-        - containerPort: 8888  # Agent metrics.
-        - containerPort: 55678 # OpenCensus receiver port.
-          hostPort: 55678      # Opentelemetry collector host receiving port = all apps can send metrics to <HOST_IP>:55678.
+        - containerPort: 8888
+          hostPort: 8888
+
+        - name: opencensus
+          containerPort: 55678
+          hostPort: 55678 # accessible to the cluster pods at <HOST>:55678
           protocol: TCP
+
+        - name: opentelemetry
+          containerPort: 55680
+
         volumeMounts:
         - name: otel-agent-config-vol
           mountPath: /conf

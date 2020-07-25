@@ -13,50 +13,54 @@ data:
       prometheus:
           config:
               scrape_configs:
-              - job_name: "statsd_exporter"
-                scrape_interval: 60s
-                static_configs:
-                - targets: ['statsd-exporter:9102']
+              # - job_name: "prometheus_targets"
+              #   scrape_interval: 60s
+              #   static_configs:
+              #   - targets:
+              #     - statsd-exporter:9102  # statsd-exporter metrics
+              #     - localhost:8888        # own metrics
 
-              # TODO: Make generic Prometheus config
-              # - job_name: 'kubernetes-pods'
-              #   scrape_interval: 10s
-              #
-              #   kubernetes_sd_configs:
-              #   - role: pod
-              #
-              #   relabel_configs:
-              #
-              #    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-              #      action: keep
-              #      regex: true
-              #
-              #    - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
-              #      action: replace
-              #      target_label: __scheme__
-              #      regex: (https?)
-              #
-              #    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-              #      action: replace
-              #      target_label: __metrics_path__
-              #      regex: (.+)
-              #
-              #    - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-              #      action: replace
-              #      regex: ([^:]+)(?::\d+)?;(\d+)
-              #      replacement: $1:$2
-              #      target_label: __address__
-              #
-              #    - action: labelmap
-              #      regex: __meta_kubernetes_pod_label_(.+)
-              #
-              #    - source_labels: [__meta_kubernetes_namespace]
-              #      action: replace
-              #      target_label: kubernetes_namespace
-              #
-              #    - source_labels: [__meta_kubernetes_pod_name]
-              #      action: replace
-              #      target_label: kubernetes_pod_name
+              - job_name: 'kubernetes-pods'
+                scrape_interval: 30s
+
+                kubernetes_sd_configs:
+                - role: pod
+
+                relabel_configs:
+                  - source_labels: [__meta_kubernetes_pod_container_port_name]
+                    action: keep
+                    regex: (.*-metrics)
+
+                 # - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+                 #   action: keep
+                 #   regex: true
+                 #
+                 # - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+                 #   action: replace
+                 #   target_label: __scheme__
+                 #   regex: (https?)
+                 #
+                 # - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+                 #   action: replace
+                 #   target_label: __metrics_path__
+                 #   regex: (.+)
+                 #
+                 # - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+                 #   action: replace
+                 #   regex: ([^:]+)(?::\d+)?;(\d+)
+                 #   replacement: $1:$2
+                 #   target_label: __address__
+                 #
+                 # - action: labelmap
+                 #   regex: __meta_kubernetes_pod_label_(.+)
+                 #
+                 # - source_labels: [__meta_kubernetes_namespace]
+                 #   action: replace
+                 #   target_label: kubernetes_namespace
+                 #
+                 # - source_labels: [__meta_kubernetes_pod_name]
+                 #   action: replace
+                 #   target_label: kubernetes_pod_name
     processors:
       batch:
       # memory_limiter:
@@ -68,6 +72,22 @@ data:
       #   spike_limit_mib: 512
       #   check_interval: 5s
       queued_retry:
+      # filter:
+      #   metrics:
+      #     exclude:
+      #       match_type: regexp
+      #       metric_names:
+      #         - go_.*
+      #         - statsd_exporter_.*
+      #         - statsd_metric_mapper_.*
+      #         - process_.*
+      filter:
+        metrics:
+          include:
+            match_type: regexp
+            metric_names:
+              - otelcol_.*
+              - demo_app_.*
     exporters:
       logging:
         loglevel: info
@@ -83,7 +103,7 @@ data:
           exporters: [logging, stackdriver]
         metrics:
           receivers: [opencensus, prometheus]
-          processors: []
+          processors: [filter]
           exporters: [logging, stackdriver]
 ---
 apiVersion: v1
@@ -96,11 +116,12 @@ metadata:
 spec:
   ports:
   - name: opencensus
-    port: 55678 # Default OpenCensus receiver port
+    port: 55678
     targetPort: 55678
-  - name: metrics
-    port: 8888 # Default endpoint for querying metrics.
-    targetPort: 8888
+
+  - name: otel-metrics
+    port: 8888
+
   selector:
     component: otel-collector
 ---
@@ -124,29 +145,31 @@ spec:
       labels:
         app: opentelemetry
         component: otel-collector
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9102'
-        prometheus.io/path: '/metrics'
     spec:
       containers:
       - command:
           - "/otelcontribcol"
           - "--config=/conf/otel-collector-config.yaml"
-          - "--mem-ballast-size-mib=165"
+          - "--mem-ballast-size-mib=350"
         image: otel/opentelemetry-collector-contrib:0.6.0
         name: otel-collector
         resources:
           limits:
-            cpu: 500m
-            memory: 500Mi
+            cpu: 1000m
+            memory: 1000Mi
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 200m
+            memory: 200Mi
         ports:
-        - containerPort: 55680 # Default OpenCensus receiver port.
-        - containerPort: 8888  # Agent metrics.
-        - containerPort: 55678 # OpenCensus receiver port.
+        - name: otel-metrics
+          containerPort: 8888
+
+        - name: opencensus
+          containerPort: 55678
+
+        - name: opentelemetry
+          containerPort: 55680
+
         volumeMounts:
         - name: otel-collector-config-vol
           mountPath: /conf
@@ -177,6 +200,28 @@ spec:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: prometheus
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   name: otel-collector-rbac
@@ -185,6 +230,6 @@ subjects:
     name: default
     namespace: default
 roleRef:
-  kind: ClusterRole
-  name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: prometheus
