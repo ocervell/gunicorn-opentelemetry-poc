@@ -13,13 +13,6 @@ data:
       prometheus:
           config:
               scrape_configs:
-              # - job_name: "prometheus_targets"
-              #   scrape_interval: 60s
-              #   static_configs:
-              #   - targets:
-              #     - statsd-exporter:9102  # statsd-exporter metrics
-              #     - localhost:8888        # own metrics
-
               - job_name: 'kubernetes-pods'
                 scrape_interval: 30s
 
@@ -63,24 +56,12 @@ data:
                  #   target_label: kubernetes_pod_name
     processors:
       batch:
-      # memory_limiter:
-      #   # Same as --mem-ballast-size-mib CLI argument
-      #   ballast_size_mib: 165
-      #   # 80% of maximum memory up to 2G
-      #   limit_mib: 1500
-      #   # 25% of limit up to 2G
-      #   spike_limit_mib: 512
-      #   check_interval: 5s
+      memory_limiter:
+        ballast_size_mib: 350 # Same as --mem-ballast-size-mib CLI argument
+        limit_mib: 850        # 80% of maximum memory up to 2G
+        spike_limit_mib: 512  # 25% of limit up to 2G
+        check_interval: 5s
       queued_retry:
-      # filter:
-      #   metrics:
-      #     exclude:
-      #       match_type: regexp
-      #       metric_names:
-      #         - go_.*
-      #         - statsd_exporter_.*
-      #         - statsd_metric_mapper_.*
-      #         - process_.*
       filter:
         metrics:
           include:
@@ -88,6 +69,16 @@ data:
             metric_names:
               - otelcol_.*
               - demo_app_.*
+              - hello_requests_otagent
+              - custom_metric_example
+      # tail_sampling:
+      #   decision_wait: 5s
+      #   num_traces: 50000 # number of traces kept in memory
+      #   policies:
+      #     - name: all-traces
+      #       type: rate_limiting
+      #       rate_limiting:
+      #         spans_per_seconds: 10
     exporters:
       logging:
         loglevel: info
@@ -99,11 +90,11 @@ data:
       pipelines:
         traces:
           receivers: [opencensus]
-          processors: [batch, queued_retry]
+          processors: [memory_limiter, batch, queued_retry]
           exporters: [logging, stackdriver]
         metrics:
           receivers: [opencensus, prometheus]
-          processors: [filter]
+          processors: [memory_limiter, filter]
           exporters: [logging, stackdriver]
 ---
 apiVersion: v1

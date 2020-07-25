@@ -20,7 +20,7 @@ spec:
           image: gcr.io/rnm-datadog-sd/flask-app:latest
           ports:
             - containerPort: 8080
-            # - containerPort: 55678
+            - containerPort: 55678
           resources:
             requests:
               memory: 256Mi
