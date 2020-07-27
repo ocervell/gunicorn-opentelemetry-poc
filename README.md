@@ -24,7 +24,7 @@ The architecture is as follows:
 
 ## Installation
 
-The installation steps below assume you already have a running GKE cluster.
+The installation steps below assumes you already have a running GKE cluster.
 
 ### Deploy the OpenTelemetry agent
 
