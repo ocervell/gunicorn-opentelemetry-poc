@@ -16,7 +16,7 @@ The architecture is as below:
 
 ## Installation
 
-The installation steps below assume you already have a running GKE cluster.
+The installation steps below assumes you already have a running GKE cluster.
 
 ### Build and deploy the gunicorn application
 
