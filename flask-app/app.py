@@ -14,51 +14,57 @@
 
 import config
 import os
-import requests
 import logging
 import time
 from flask import Flask
 from opentelemetry import trace, metrics
-from opentelemetry.ext.flask import FlaskInstrumentor
+#from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
+from opentelemetry.sdk.resources import get_aggregated_resources
 from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
 from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
+from gke_detector import GoogleCloudResourceDetector
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
 span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial",
                                        endpoint=OTEL_AGENT_ENDPOINT)
 exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
                                      endpoint=OTEL_AGENT_ENDPOINT)
+resources = get_aggregated_resources([GoogleCloudResourceDetector()])
 
 # Metrics
-metrics.set_meter_provider(MeterProvider())
+metrics.set_meter_provider(MeterProvider(resource=resources))
 meter = metrics.get_meter(__name__, True)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
-trace.set_tracer_provider(TracerProvider())
+trace.set_tracer_provider(TracerProvider(resource=resources))
 trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
 pid = os.getpid()
-staging_labels = {"environment": "staging", "pid": str(pid)}
+staging_labels = {
+    "environment": "staging",
+    "pid": str(pid),
+    "namespace": os.getenv('NAMESPACE'),
+    "pod_ip": os.getenv("POD_IP"),
+    "pod_name": os.getenv("POD_NAME")
+}
+
 requests_counter = meter.create_metric(
-    name="hello_requests_otagent",
+    name="flask_app_hello_requests",
     description="Hello requests count",
     unit="1",
     value_type=int,
     metric_type=Counter,
-    label_keys=(
-        "environment",
-        "pid",
-    ),
+    label_keys=tuple(staging_labels.keys()),
 )
 
 # Flask application
 app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app)
+#FlaskInstrumentor().instrument_app(app)
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
