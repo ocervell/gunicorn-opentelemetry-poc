@@ -59,6 +59,8 @@ To change the configuration of the agent, refer to the configuration [documentat
     kubectl apply -f k8s/locust_master_controller.yaml
     kubectl apply -f k8s/locust_master_service.yaml
 
-Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
+    # Get `LOCUST_MASTER` IP
+    kubectl get service/locust-master | awk '{print $4}' | tail -1
 
+Set the `LOCUST_MASTER` env variable to the IP above in `k8s/locust_worker_controller.yaml` and apply it:
     kubectl apply -f k8s/locust_worker_controller.yaml
