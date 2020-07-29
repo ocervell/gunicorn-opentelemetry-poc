@@ -24,6 +24,29 @@ data:
                     action: keep
                     regex: (.*-metrics)
 
+                  - action: labelmap
+                    regex: __meta_kubernetes_pod_label_(.+)
+
+                  - source_labels: [__meta_kubernetes_namespace]
+                    action: replace
+                    target_label: kubernetes_namespace
+
+                  - source_labels: [__meta_kubernetes_pod_name]
+                    action: replace
+                    target_label: kubernetes_pod_name
+
+                  - source_labels: [__meta_kubernetes_pod_container_name]
+                    action: replace
+                    target_label: kubernetes_container_name
+
+                  - source_labels: [__meta_kubernetes_pod_host_ip]
+                    action: replace
+                    target_label: kubernetes_pod_host_ip
+
+                  - source_labels: [__meta_kubernetes_pod_label_name]
+                    action: replace
+                    target_label: app
+
                  # - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
                  #   action: keep
                  #   regex: true
@@ -44,20 +67,11 @@ data:
                  #   replacement: $1:$2
                  #   target_label: __address__
                  #
-                 # - action: labelmap
-                 #   regex: __meta_kubernetes_pod_label_(.+)
-                 #
-                 # - source_labels: [__meta_kubernetes_namespace]
-                 #   action: replace
-                 #   target_label: kubernetes_namespace
-                 #
-                 # - source_labels: [__meta_kubernetes_pod_name]
-                 #   action: replace
-                 #   target_label: kubernetes_pod_name
+
     processors:
       batch:
       memory_limiter:
-        ballast_size_mib: 350 # Same as --mem-ballast-size-mib CLI argument
+        ballast_size_mib: 500 # Same as --mem-ballast-size-mib CLI argument
         limit_mib: 850        # 80% of maximum memory up to 2G
         spike_limit_mib: 512  # 25% of limit up to 2G
         check_interval: 5s
@@ -68,9 +82,23 @@ data:
             match_type: regexp
             metric_names:
               - otelcol_.*
-              - demo_app_.*
-              - hello_requests_otagent
+              - flask_app.*
               - custom_metric_example
+      k8s_tagger:
+      # resource:
+      #   attributes:
+      #   - key: project_id
+      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/project_id
+      #     action: insert
+      #
+      #   - key: location
+      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/location
+      #     action: insert
+      #
+      #   - key: namespace_name
+      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/generic_task/namespace
+      #     action: insert
+
       # tail_sampling:
       #   decision_wait: 5s
       #   num_traces: 50000 # number of traces kept in memory
@@ -81,20 +109,37 @@ data:
       #         spans_per_seconds: 10
     exporters:
       logging:
-        loglevel: info
+        loglevel: debug
       stackdriver:
+        # resource_mappings:
+        # - source_type: global
+        #   target_type: gke_container
+        #   label_mappings:
+        #
+        #     - source_key: contrib.opencensus.io/exporter/stackdriver/project_id
+        #       target_key: project_id
+        #       optional: true
+        #
+        #     - source_key: contrib.opencensus.io/exporter/stackdriver/location
+        #       target_key: location
+        #       optional: true
+        #
+        #     - source_key: contrib.opencensus.io/exporter/stackdriver/generic_task/namespace
+        #       target_key: namespace_name
+        #       optional: true
+
     extensions:
       health_check:
     service:
       extensions: [health_check]
       pipelines:
-        traces:
-          receivers: [opencensus]
-          processors: [memory_limiter, batch, queued_retry]
-          exporters: [logging, stackdriver]
+        # traces:
+        #   receivers: [opencensus]
+        #   processors: [memory_limiter, k8s_tagger, batch, queued_retry]
+        #   exporters: [logging, stackdriver]
         metrics:
           receivers: [opencensus, prometheus]
-          processors: [memory_limiter, filter]
+          processors: [memory_limiter, k8s_tagger, filter]
           exporters: [logging, stackdriver]
 ---
 apiVersion: v1
@@ -141,16 +186,16 @@ spec:
       - command:
           - "/otelcontribcol"
           - "--config=/conf/otel-collector-config.yaml"
-          - "--mem-ballast-size-mib=350"
+          - "--mem-ballast-size-mib=500"
         image: otel/opentelemetry-collector-contrib:0.6.0
         name: otel-collector
         resources:
           limits:
-            cpu: 1000m
-            memory: 1000Mi
+            cpu: 1500m
+            memory: 1500Mi
           requests:
-            cpu: 200m
-            memory: 200Mi
+            cpu: 400m
+            memory: 400Mi
         ports:
         - name: otel-metrics
           containerPort: 8888
@@ -202,6 +247,10 @@ rules:
   - services
   - endpoints
   - pods
+  - statefulsets
+  - replicasets
+  - daemonsets
+  - deployments
   verbs: ["get", "list", "watch"]
 - apiGroups:
   - extensions

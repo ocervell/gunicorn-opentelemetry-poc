@@ -12,13 +12,27 @@ data:
         opencensus:
     exporters:
         logging:
-            loglevel: info
+            loglevel: debug
         opencensus:
           endpoint: "otel-collector:55678"
           insecure: true
     processors:
         batch:
         queued_retry:
+        k8s_tagger:
+          passthrough: true
+          auth_type: "kubeConfig"
+          filter:
+            node_from_env_var: KUBE_NODE_NAME
+          extract:
+            metadata:
+              # extract the following well-known metadata fields
+              - podName
+              - podUID
+              - deployment
+              - cluster
+              - namespace
+              - node
     extensions:
         health_check:
     service:
@@ -30,7 +44,7 @@ data:
                 exporters: [opencensus,logging]
             metrics:
                 receivers: [opencensus]
-                processors: []
+                processors: [k8s_tagger]
                 exporters: [opencensus,logging]
 
 ---
@@ -66,6 +80,12 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
+        env:
+          - name: KUBE_NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
         ports:
         - containerPort: 8888
           hostPort: 8888
