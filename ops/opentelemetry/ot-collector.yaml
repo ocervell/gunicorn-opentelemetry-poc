@@ -107,32 +107,18 @@ data:
       logging:
         loglevel: debug
       stackdriver:
-        # resource_mappings:
-        # - source_type: global
-        #   target_type: gke_container
-        #   label_mappings:
-        #
-        #     - source_key: contrib.opencensus.io/exporter/stackdriver/project_id
-        #       target_key: project_id
-        #       optional: true
-        #
-        #     - source_key: contrib.opencensus.io/exporter/stackdriver/location
-        #       target_key: location
-        #       optional: true
-        #
-        #     - source_key: contrib.opencensus.io/exporter/stackdriver/generic_task/namespace
-        #       target_key: namespace_name
-        #       optional: true
-
+        resource_mappings:
+        - source_type: source.global
+          target_type: gke_container
     extensions:
       health_check:
     service:
       extensions: [health_check]
       pipelines:
-        # traces:
-        #   receivers: [opencensus]
-        #   processors: [memory_limiter, k8s_tagger, batch, queued_retry]
-        #   exporters: [logging, stackdriver]
+        traces:
+          receivers: [opencensus]
+          processors: [memory_limiter, k8s_tagger, batch, queued_retry]
+          exporters: [logging, stackdriver]
         metrics:
           receivers: [opencensus, prometheus]
           processors: [memory_limiter, k8s_tagger, filter]

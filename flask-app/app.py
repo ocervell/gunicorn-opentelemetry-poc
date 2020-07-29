@@ -18,7 +18,7 @@ import logging
 import time
 from flask import Flask
 from opentelemetry import trace, metrics
-#from opentelemetry.ext.flask import FlaskInstrumentor
+from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
@@ -64,7 +64,7 @@ requests_counter = meter.create_metric(
 
 # Flask application
 app = Flask(__name__)
-#FlaskInstrumentor().instrument_app(app)
+FlaskInstrumentor().instrument_app(app)
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')

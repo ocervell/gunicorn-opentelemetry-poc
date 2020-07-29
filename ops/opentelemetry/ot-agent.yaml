@@ -28,7 +28,7 @@ data:
         pipelines:
             traces:
                 receivers: [opencensus]
-                processors: [batch, queued_retry]
+                processors: [batch, k8s_tagger, queued_retry]
                 exporters: [opencensus,logging]
             metrics:
                 receivers: [opencensus]
@@ -68,12 +68,6 @@ spec:
           requests:
             cpu: 100m
             memory: 100Mi
-        env:
-          - name: KUBE_NODE_NAME
-            valueFrom:
-              fieldRef:
-                apiVersion: v1
-                fieldPath: spec.nodeName
         ports:
         - containerPort: 8888
           hostPort: 8888
