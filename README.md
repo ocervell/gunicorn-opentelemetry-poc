@@ -51,6 +51,7 @@ To change the configuration of the agent, refer to the configuration [documentat
     cd flask-app
     gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
     kubectl apply -f app.yaml
+    kubectl apply -f service.yaml
 
 ### Deploy the loadtester
 
