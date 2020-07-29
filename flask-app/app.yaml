@@ -41,6 +41,9 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
 
+            - name: CONTAINER_NAME  # required by GKE detector
+              value: flask-app-tutorial
+
             - name: POD_IP
               valueFrom:
                 fieldRef:
