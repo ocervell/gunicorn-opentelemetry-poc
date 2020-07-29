@@ -21,18 +21,6 @@ data:
         queued_retry:
         k8s_tagger:
           passthrough: true
-          auth_type: "kubeConfig"
-          filter:
-            node_from_env_var: KUBE_NODE_NAME
-          extract:
-            metadata:
-              # extract the following well-known metadata fields
-              - podName
-              - podUID
-              - deployment
-              - cluster
-              - namespace
-              - node
     extensions:
         health_check:
     service:

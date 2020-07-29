@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -30,18 +31,6 @@ spec:
             - name: DEBUG_MODE
               value: "1"
 
-            - name: OTEL_AGENT_HOST
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
-
-            - name: KUBE_NODE_NAME
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: spec.nodeName
-
             - name: POD_NAME
               valueFrom:
                 fieldRef:
@@ -56,6 +45,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+
+            - name: OTEL_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: status.hostIP
 
             - name: OTEL_AGENT_ENDPOINT
               value: $(OTEL_AGENT_HOST):55678

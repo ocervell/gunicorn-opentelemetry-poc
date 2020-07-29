@@ -85,20 +85,16 @@ data:
               - flask_app.*
               - custom_metric_example
       k8s_tagger:
-      # resource:
-      #   attributes:
-      #   - key: project_id
-      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/project_id
-      #     action: insert
-      #
-      #   - key: location
-      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/location
-      #     action: insert
-      #
-      #   - key: namespace_name
-      #     from_attribute: contrib.opencensus.io/exporter/stackdriver/generic_task/namespace
-      #     action: insert
-
+        auth_type: "kubeConfig"
+        extract:
+          metadata:
+            # extract the following well-known metadata fields
+            - podName
+            - podUID
+            - deployment
+            - cluster
+            - namespace
+            - node
       # tail_sampling:
       #   decision_wait: 5s
       #   num_traces: 50000 # number of traces kept in memory
