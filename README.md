@@ -12,19 +12,22 @@ This branch deploys an agentless setup using the OpenTelemetry SDK:
 
 The architecture is as below:
 
-![](architecture.png)
+![](<architecture .png>)
 
 ## Installation
 
 The installation steps below assumes you already have a running GKE cluster.
 
+### Deploy the custom-metrics-example
+
+    cd custom-metrics-example
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest .
+    kubectl apply -f app.yaml
+
 ### Build and deploy the gunicorn application
 
     cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:<VERSION> .
-
-Update the version of the app in the `app.yaml`, and then deploy the app to your GKE cluster:
-
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
     kubectl apply -f app.yaml
 
 ### Deploy Prometheus and patch it with prometheus-to-sd
@@ -35,7 +38,7 @@ Update the version of the app in the `app.yaml`, and then deploy the app to your
 ### Deploy the loadtester
 
     cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:<VERSION> .
+    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:latest
     kubectl apply -f k8s/locust_master_controller.yaml
     kubectl apply -f k8s/locust_master_service.yaml
 

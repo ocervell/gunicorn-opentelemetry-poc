@@ -14,13 +14,12 @@
 
 import config
 import os
-import requests
 import logging
 import time
+import pprint
 from flask import Flask
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
-from opentelemetry.ext.requests import RequestsInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
@@ -41,20 +40,27 @@ trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
-staging_labels = {"environment": "staging"}
+metric_labels = {
+    'app': 'flask-app',
+    'environment': 'staging',
+    'kubernetes_container_name': os.getenv('CONTAINER_NAME'),
+    'kubernetes_namespace': os.getenv('NAMESPACE'),
+    'kubernetes_pod_name': os.getenv('POD_NAME'),
+    'kubernetes_pod_ip': os.getenv('POD_IP'),
+    'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
+}
 requests_counter = meter.create_metric(
-    name="hello_requests_otagent",
-    description="Hello requests count",
-    unit="1",
+    name='flask_app_hello_requests',
+    description='Hello requests count',
+    unit='1',
     value_type=int,
     metric_type=Counter,
-    label_keys=("environment", ),
+    label_keys=tuple(metric_labels.keys()),
 )
 
 # Flask application
 app = Flask(__name__)
 FlaskInstrumentor().instrument_app(app)
-RequestsInstrumentor().instrument()
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -64,12 +70,10 @@ app.logger.setLevel(gunicorn_logger.level)
 
 @app.route("/")
 def hello():
-    app.logger.info("Received hello request !")
-    requests_counter.add(1, staging_labels)
-    app.logger.debug("Counter was incremented.")
-    time.sleep(1)
-    requests.get('https://www.google.com')
-    return "Hello World!"
+    app.logger.info('Received hello request !')
+    requests_counter.add(1, metric_labels)
+    app.logger.debug('Counter was incremented.')
+    return 'Hello World!'
 
 
 if __name__ == "__main__":

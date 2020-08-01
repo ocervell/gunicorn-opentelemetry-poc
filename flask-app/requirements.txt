@@ -1,3 +1,4 @@
+requests
 Click==7.0
 Flask==1.0.2
 gunicorn==19.9.0
@@ -5,9 +6,10 @@ itsdangerous==1.1.0
 Jinja2>=2.10.1
 MarkupSafe==1.1.0
 werkzeug>=0.15.3
-opentelemetry-api
-opentelemetry-sdk
+-e git+https://github.com/open-telemetry/opentelemetry-python.git@master#egg=opentelemetry-api&subdirectory=opentelemetry-api
+-e git+https://github.com/open-telemetry/opentelemetry-python.git@master#egg=opentelemetry-sdk&subdirectory=opentelemetry-sdk
+opentelemetry-instrumentation
 opentelemetry-ext-flask
 opentelemetry-ext-requests
-opentelemetry-exporter-cloud-monitoring # metrics export to Cloud Monitoring
-opentelemetry-exporter-cloud-trace # trace export to Cloud Trace
+opentelemetry-exporter-cloud-monitoring
+opentelemetry-exporter-cloud-trace

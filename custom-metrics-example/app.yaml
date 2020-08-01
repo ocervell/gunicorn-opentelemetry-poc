@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: custom-metrics-example
-          image: gcr.io/rnm-datadog-sd/custom-metrics-example:v1.0.0-otcloudops
+          image: gcr.io/rnm-datadog-sd/custom-metrics-example:latest
           ports:
             - containerPort: 55678
           resources:
@@ -28,12 +28,3 @@ spec:
           env:
             - name: DEBUG_MODE
               value: "1"
-
-            - name: OTEL_AGENT_HOST
-              valueFrom:
-                fieldRef:
-                  apiVersion: v1
-                  fieldPath: status.hostIP
-
-            - name: OTEL_AGENT_ENDPOINT
-              value: $(OTEL_AGENT_HOST):55678
