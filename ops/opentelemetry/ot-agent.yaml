@@ -19,8 +19,6 @@ data:
     processors:
         batch:
         queued_retry:
-        k8s_tagger:
-          passthrough: true
     extensions:
         health_check:
     service:
@@ -28,11 +26,11 @@ data:
         pipelines:
             traces:
                 receivers: [opencensus]
-                processors: [batch, k8s_tagger, queued_retry]
+                processors: [batch, queued_retry]
                 exporters: [opencensus,logging]
             metrics:
                 receivers: [opencensus]
-                processors: [k8s_tagger]
+                processors: []
                 exporters: [opencensus,logging]
 
 ---

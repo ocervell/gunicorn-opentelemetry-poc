@@ -84,17 +84,6 @@ data:
               - otelcol_.*
               - flask_app.*
               - custom_metric_example
-      k8s_tagger:
-        auth_type: "kubeConfig"
-        extract:
-          metadata:
-            # extract the following well-known metadata fields
-            - podName
-            - podUID
-            - deployment
-            - cluster
-            - namespace
-            - node
       # tail_sampling:
       #   decision_wait: 5s
       #   num_traces: 50000 # number of traces kept in memory
@@ -107,9 +96,6 @@ data:
       logging:
         loglevel: debug
       stackdriver:
-        resource_mappings:
-        - source_type: source.global
-          target_type: gke_container
     extensions:
       health_check:
     service:
@@ -117,11 +103,11 @@ data:
       pipelines:
         traces:
           receivers: [opencensus]
-          processors: [memory_limiter, k8s_tagger, batch, queued_retry]
+          processors: [memory_limiter, batch, queued_retry]
           exporters: [logging, stackdriver]
         metrics:
           receivers: [opencensus, prometheus]
-          processors: [memory_limiter, k8s_tagger, filter]
+          processors: [memory_limiter, filter]
           exporters: [logging, stackdriver]
 ---
 apiVersion: v1
