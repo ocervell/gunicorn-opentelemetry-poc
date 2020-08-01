@@ -17,6 +17,9 @@ data:
                   scrape_interval: 30s
                   kubernetes_sd_configs:
                   - role: pod
+                    selectors:
+                      - role: pod
+                        field: "spec.nodeName=$NODE_NAME"
                   relabel_configs:
                     - source_labels: [__meta_kubernetes_pod_container_port_name]
                       action: keep
@@ -99,6 +102,12 @@ spec:
           - "--mem-ballast-size-mib=165"
         image: otel/opentelemetry-collector-contrib:0.6.0
         name: otel-agent
+        env:
+          - name: NODE_NAME
+            valueFrom:
+              fieldRef:
+                apiVersion: v1
+                fieldPath: spec.nodeName
         resources:
           limits:
             cpu: 500m
@@ -108,7 +117,8 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 55680 # Default OpenTelemetry receiver port.
-        - containerPort: 8888  # Agent metrics.
+        - name: otel-metrics
+          containerPort: 8888  # Agent metrics.
         - containerPort: 55678 # OpenCensus receiver port.
           hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to <HOST_IP>:55678.
           protocol: TCP
