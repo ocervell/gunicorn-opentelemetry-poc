@@ -1,3 +1,4 @@
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -14,10 +15,6 @@ spec:
       name: flask-app-tutorial
       labels:
         name: flask-app-tutorial
-      annotations:
-        prometheus.io/scrape: 'true'
-        prometheus.io/port: '9102'
-        prometheus.io/path: '/metrics'
     spec:
       containers:
         - name: flask-app-tutorial
@@ -34,6 +31,7 @@ spec:
             - name: DEBUG_MODE
               value: "1"
 
+            # OTEL Agent host / ip
             - name: OTEL_AGENT_HOST
               valueFrom:
                 fieldRef:
@@ -43,49 +41,32 @@ spec:
             - name: OTEL_AGENT_ENDPOINT
               value: $(OTEL_AGENT_HOST):55678
 
+            # Metric & resource labels
+            - name: CONTAINER_NAME
+              value: flask-app-tutorial
+
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
         - name: statsd-exporter
           image: prom/statsd-exporter
           args: ["--log.level=debug"]
           imagePullPolicy: Always
           ports:
-          - containerPort: 9102
+          - name: statsd-metrics
+            containerPort: 9102
+
           - containerPort: 9125
             protocol: UDP
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: flask-app-tutorial
-  name: flask-app-tutorial
-  namespace: default
-spec:
-  type: LoadBalancer
-  externalTrafficPolicy: Cluster
-  ports:
-  - name: app
-    nodePort: 32424
-    protocol: TCP
-    port: 80
-    targetPort: 8080
-  selector:
-    name: flask-app-tutorial
-  sessionAffinity: None
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: statsd-exporter
-  name: statsd-exporter
-  namespace: default
-spec:
-  ports:
-    - name: statsd-metrics
-      protocol: TCP
-      port: 9102
-      targetPort: 9102
-  selector:
-    name: flask-app-tutorial
-  sessionAffinity: None
