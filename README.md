@@ -20,7 +20,7 @@ In this design:
 
 The architecture is as follows:
 
-![](gke_ot_1.png)
+![](architecture.png)
 
 ## Installation
 
