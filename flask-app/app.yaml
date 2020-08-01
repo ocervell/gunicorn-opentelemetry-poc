@@ -31,24 +31,7 @@ spec:
             - name: DEBUG_MODE
               value: "1"
 
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-
-            - name: CONTAINER_NAME  # required by GKE detector
-              value: flask-app-tutorial
-
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
-
+            # OTEL Agent host / ip
             - name: OTEL_AGENT_HOST
               valueFrom:
                 fieldRef:
@@ -57,6 +40,25 @@ spec:
 
             - name: OTEL_AGENT_ENDPOINT
               value: $(OTEL_AGENT_HOST):55678
+
+            # Metric & resource labels
+            - name: CONTAINER_NAME
+              value: flask-app-tutorial
+
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
 
         - name: statsd-exporter
           image: prom/statsd-exporter

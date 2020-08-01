@@ -16,6 +16,7 @@ import config
 import os
 import logging
 import time
+import pprint
 from flask import Flask
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
@@ -27,39 +28,41 @@ from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetr
 from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
 from gke_detector import GoogleCloudResourceDetector
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
-span_exporter = OpenCensusSpanExporter(service_name="flask-app-tutorial",
+span_exporter = OpenCensusSpanExporter(service_name='flask-app-tutorial',
                                        endpoint=OTEL_AGENT_ENDPOINT)
-exporter = OpenCensusMetricsExporter(service_name="flask-app-tutorial",
+exporter = OpenCensusMetricsExporter(service_name='flask-app-tutorial',
                                      endpoint=OTEL_AGENT_ENDPOINT)
-resources = get_aggregated_resources([GoogleCloudResourceDetector()])
+resource = get_aggregated_resources([GoogleCloudResourceDetector()])
 
 # Metrics
-metrics.set_meter_provider(MeterProvider(resource=resources))
+metrics.set_meter_provider(MeterProvider(resource=resource))
 meter = metrics.get_meter(__name__, True)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
-trace.set_tracer_provider(TracerProvider(resource=resources))
+trace.set_tracer_provider(TracerProvider(resource=resource))
 trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
 
 # Custom metrics
 pid = os.getpid()
-staging_labels = {
-    "environment": "staging",
-    "pid": str(pid),
-    "namespace": os.getenv('NAMESPACE'),
-    "pod_ip": os.getenv("POD_IP"),
-    "pod_name": os.getenv("POD_NAME")
+metric_labels = {
+    'pid': str(pid),
+    'app': 'flask-app',
+    'environment': 'staging',
+    'kubernetes_container_name': os.getenv('CONTAINER_NAME'),
+    'kubernetes_namespace': os.getenv('NAMESPACE'),
+    'kubernetes_pod_name': os.getenv('POD_NAME'),
+    'kubernetes_pod_ip': os.getenv('POD_IP'),
+    'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
 }
-
 requests_counter = meter.create_metric(
-    name="flask_app_hello_requests",
-    description="Hello requests count",
-    unit="1",
+    name='flask_app_hello_requests',
+    description='Hello requests count',
+    unit='1',
     value_type=int,
     metric_type=Counter,
-    label_keys=tuple(staging_labels.keys()),
+    label_keys=tuple(metric_labels.keys()),
 )
 
 # Flask application
@@ -75,10 +78,10 @@ app.logger.info(f'Otel agent endpoint: {OTEL_AGENT_ENDPOINT}')
 
 @app.route("/")
 def hello():
-    app.logger.info("Received hello request !")
-    requests_counter.add(1, staging_labels)
-    app.logger.debug("Counter was incremented.")
-    return "Hello World!"
+    app.logger.info('Received hello request !')
+    requests_counter.add(1, metric_labels)
+    app.logger.debug('Counter was incremented.')
+    return 'Hello World!'
 
 
 if __name__ == "__main__":
