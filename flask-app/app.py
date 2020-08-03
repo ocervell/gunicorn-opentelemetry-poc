@@ -23,21 +23,20 @@ from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
-from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
+from prometheus_flask_exporter.multiprocess import GunicornPrometheusMetrics
 
 span_exporter = CloudTraceSpanExporter()
-exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
-
-# Metrics
-metrics.set_meter_provider(MeterProvider())
-meter = metrics.get_meter(__name__, True)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 
 # Traces
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(
     BatchExportSpanProcessor(span_exporter))
+
+# Flask application
+app = Flask(__name__)
+FlaskInstrumentor().instrument_app(app)
+metrics = GunicornPrometheusMetrics(app)
 
 # Custom metrics
 metric_labels = {
@@ -49,18 +48,9 @@ metric_labels = {
     'kubernetes_pod_ip': os.getenv('POD_IP'),
     'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
 }
-requests_counter = meter.create_metric(
-    name='flask_app_hello_requests',
-    description='Hello requests count',
-    unit='1',
-    value_type=int,
-    metric_type=Counter,
-    label_keys=tuple(metric_labels.keys()),
-)
-
-# Flask application
-app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app)
+requests_counter = metrics.counter('flask_app_hello_requests',
+                                   'Hello requests count',
+                                   labels=metric_labels)
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -69,9 +59,9 @@ app.logger.setLevel(gunicorn_logger.level)
 
 
 @app.route("/")
+@requests_counter
 def hello():
     app.logger.info('Received hello request !')
-    requests_counter.add(1, metric_labels)
     app.logger.debug('Counter was incremented.')
     return 'Hello World!'
 
