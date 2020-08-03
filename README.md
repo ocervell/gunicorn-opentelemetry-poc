@@ -6,13 +6,13 @@ The metrics backend configured in this repository is Cloud Monitoring (ex Stackd
 
 This branch deploys an agentless setup using the OpenTelemetry SDK:
 
--   Custom metrics are directly sent to Cloud Trace / Cloud Monitoring from the application code, using the corresponding OpenTelemetry SDK exporters.
--   OT agent / collector deployments are not deployed.
--   Prometheus / `prometheus-to-sd` are deployed.
+-   **OpenTelemetry SDK (Python)** is used to send traces directly to Cloud Monitoring and expose custom metrics to a Prometheus exporter.
+-   **Prometheus** and `prometheus-to-sd` are deployed to scrape metrics from Prometheus exporters.
+-   **OpenTelemetry collector is NOT deployed.**
 
 The architecture is as below:
 
-![](<architecture .png>)
+![](architecture.png)
 
 ## Installation
 
@@ -32,8 +32,13 @@ The installation steps below assumes you already have a running GKE cluster.
 
 ### Deploy Prometheus and patch it with prometheus-to-sd
 
-    cd ops/prometheus/full
-    # follow instructions in the README.md
+    cd ops/prometheus/
+    kubectl apply -f prometheus.yaml
+
+Set the required variables in `.env` file, then:
+
+    source .env
+    ./patch.sh
 
 ### Deploy the loadtester
 
