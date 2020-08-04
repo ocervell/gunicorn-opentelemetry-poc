@@ -20,8 +20,9 @@ spec:
         - name: flask-app-tutorial
           image: gcr.io/rnm-datadog-sd/flask-app:latest
           ports:
+            - name: flask-metrics
+              containerPort: 9090
             - containerPort: 8080
-            - containerPort: 55678
           resources:
             requests:
               memory: 256Mi
@@ -30,25 +31,6 @@ spec:
           env:
             - name: DEBUG_MODE
               value: "1"
-
-            # Metric & resource labels
-            - name: CONTAINER_NAME
-              value: flask-app-tutorial
-
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-
-            - name: POD_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
-
-            - name: POD_IP
-              valueFrom:
-                fieldRef:
-                  fieldPath: status.podIP
 
         - name: statsd-exporter
           image: prom/statsd-exporter

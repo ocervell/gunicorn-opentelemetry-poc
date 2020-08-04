@@ -24,11 +24,12 @@ workers = multiprocessing.cpu_count() * 2 + 1
 threads = 2 * multiprocessing.cpu_count()
 
 # Prometheus Flask exporter
+env['prometheus_multiproc_dir'] = '/tmp'
 from prometheus_flask_exporter.multiprocess import GunicornPrometheusMetrics
 
 
 def when_ready(server):
-    GunicornPrometheusMetrics.start_http_server_when_ready(8080)
+    GunicornPrometheusMetrics.start_http_server_when_ready(9090)
 
 
 def child_exit(server, worker):

@@ -39,15 +39,7 @@ FlaskInstrumentor().instrument_app(app)
 metrics = GunicornPrometheusMetrics(app)
 
 # Custom metrics
-metric_labels = {
-    'app': 'flask-app',
-    'environment': 'staging',
-    'kubernetes_container_name': os.getenv('CONTAINER_NAME'),
-    'kubernetes_namespace': os.getenv('NAMESPACE'),
-    'kubernetes_pod_name': os.getenv('POD_NAME'),
-    'kubernetes_pod_ip': os.getenv('POD_IP'),
-    'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
-}
+metric_labels = {'app': 'flask-app', 'environment': 'staging'}
 requests_counter = metrics.counter('flask_app_hello_requests',
                                    'Hello requests count',
                                    labels=metric_labels)
