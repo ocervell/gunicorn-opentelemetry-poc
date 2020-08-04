@@ -31,14 +31,3 @@ spec:
           env:
             - name: DEBUG_MODE
               value: "1"
-
-        - name: statsd-exporter
-          image: prom/statsd-exporter
-          args: ["--log.level=debug"]
-          imagePullPolicy: Always
-          ports:
-          - name: statsd-metrics
-            containerPort: 9102
-
-          - containerPort: 9125
-            protocol: UDP
