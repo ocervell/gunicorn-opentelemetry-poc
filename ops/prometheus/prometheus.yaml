@@ -44,22 +44,18 @@ kind: Service
 metadata:
   labels:
     app: prometheus-k8s
-  annotations:
-    prometheus.io/scrape: 'true'
-    prometheus.io/port: '9090'
-    prometheus.io/port2: '9091'
   name: prometheus-k8s
   namespace: default
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Cluster
   ports:
-  - name: prometheus
+  - name: prometheus-metrics
     nodePort: 32387
     port: 9090
     protocol: TCP
     targetPort: 9090
-  - name: sidecar
+  - name: sidecar-metrics
     nodePort: 30182
     port: 9091
     protocol: TCP
@@ -132,18 +128,6 @@ data:
       kubernetes_sd_configs:
       - role: pod
       relabel_configs:
-        # - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-        #   action: keep
-        #   regex: true
-        # - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-        #   action: replace
-        #   target_label: __metrics_path__
-        #   regex: (.+)
-        # - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-        #   action: replace
-        #   regex: ([^:]+)(?::\d+)?;(\d+)
-        #   replacement: $1:$2
-        #   target_label: __address__
         - source_labels: [__meta_kubernetes_pod_container_port_name]
           action: keep
           regex: (.*-metrics)
@@ -164,38 +148,3 @@ data:
         - source_labels: [__meta_kubernetes_pod_label_name]
           action: replace
           target_label: app
-
-    # - job_name: 'kubernetes-services'
-    #   scrape_interval: 30s
-    #   kubernetes_sd_configs:
-    #   - role: endpoints
-    #   relabel_configs:
-    #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
-    #       action: keep
-    #       regex: true
-    #     - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
-    #       action: replace
-    #       target_label: __metrics_path__
-    #       regex: (.+)
-    #     - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
-    #       action: replace
-    #       regex: ([^:]+)(?::\d+)?;(\d+)
-    #       replacement: $1:$2
-    #       target_label: __address__
-    #     - action: labelmap
-    #       regex: __meta_kubernetes_pod_label_(.+)
-    #     - source_labels: [__meta_kubernetes_namespace]
-    #       action: replace
-    #       target_label: kubernetes_namespace
-    #     - source_labels: [__meta_kubernetes_pod_name]
-    #       action: replace
-    #       target_label: kubernetes_pod_name
-    #     - source_labels: [__meta_kubernetes_pod_container_name]
-    #       action: replace
-    #       target_label: kubernetes_container_name
-    #     - source_labels: [__meta_kubernetes_pod_host_ip]
-    #       action: replace
-    #       target_label: kubernetes_pod_host_ip
-    #     - source_labels: [__meta_kubernetes_pod_label_name]
-    #       action: replace
-    #       target_label: app
