@@ -52,3 +52,27 @@ Set the required variables in `.env` file, then:
 Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
 
     kubectl apply -f k8s/locust_worker_controller.yaml
+
+### Observe the metrics in Cloud Monitoring
+
+The metrics deployed by this setup in Cloud Monitoring should match the following types:
+
+    external.googleapis.com/prometheus/custom_metric_example
+    external.googleapis.com/prometheus/flask_app_hello_requests
+    external.googleapis.com/prometheus/flask_exporter_info
+    external.googleapis.com/prometheus/flask_http_request
+    external.googleapis.com/prometheus/flask_http_request_duration_seconds
+    external.googleapis.com/prometheus/process_cpu_seconds
+    external.googleapis.com/prometheus/process_max_fds
+    external.googleapis.com/prometheus/process_open_fds
+    external.googleapis.com/prometheus/process_resident_memory_bytes
+    external.googleapis.com/prometheus/process_start_time_seconds
+    external.googleapis.com/prometheus/process_virtual_memory_bytes
+    external.googleapis.com/prometheus/python_gc_collections
+    external.googleapis.com/prometheus/python_gc_objects_collected
+    external.googleapis.com/prometheus/python_gc_objects_uncollectable
+    external.googleapis.com/prometheus/python_info
+    external.googleapis.com/prometheus/scrape_duration_seconds
+    external.googleapis.com/prometheus/scrape_samples_post_metric_relabeling
+    external.googleapis.com/prometheus/scrape_samples_scraped
+    external.googleapis.com/prometheus/up
