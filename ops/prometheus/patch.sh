@@ -3,7 +3,7 @@
 set -e
 set -u
 
-kubectl -n "${KUBE_NAMESPACE}" patch deployment/prometheus-k8s -n kube-system --type strategic --patch "
+kubectl -n "${KUBE_NAMESPACE}" patch deployment/prometheus-k8s --type strategic --patch "
 spec:
   template:
     spec:
@@ -16,6 +16,7 @@ spec:
         - --prometheus.wal-directory=/data/wal
         - --stackdriver.kubernetes.location=${GCP_REGION}
         - --stackdriver.kubernetes.cluster-name=${KUBE_CLUSTER}
+        -  --include={job=~'kubernetes-pods'}
         ports:
         - name: sidecar
           containerPort: 9091
