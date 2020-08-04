@@ -4,11 +4,13 @@ This repository is a POC application to demonstrate OpenTelemetry instrumentatio
 
 The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying it should be straightforward to adapt this example to other metrics or trace backends.
 
-This branch deploys an agentless setup using the OpenTelemetry SDK:
+This branch deploys a Prometheus-based monitoring setup:
 
--   **OpenTelemetry SDK (Python)** is used to send traces directly to Cloud Monitoring and expose custom metrics to a Prometheus exporter.
--   **Prometheus** and `prometheus-to-sd` are deployed to scrape metrics from Prometheus exporters.
+-   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces directly to Cloud Monitoring.
+-   **[Prometheus Flask exporter](https://github.com/rycus86/prometheus_flask_exporter)** is used to expose framework (gunicorn) metrics and custom metrics as a Prometheus scrape endpoint.
+-   **[Prometheus](https://prometheus.io/)** and **[stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar)** are deployed to scrape metrics from Prometheus exporters.
 -   **OpenTelemetry collector is NOT deployed.**
+-   **statsd-exporter is NOT deployed** because the Prometheus Flask exporter supports gunicorn multiprocessed setup.
 
 The architecture is as below:
 
