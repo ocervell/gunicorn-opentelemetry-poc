@@ -26,7 +26,8 @@ build:
     context: src/flask-app
   - image: loadtester
     context: src/loadtester
-  kaniko: {}
+  kaniko:
+    cache: {}
   tagPolicy:
     gitCommit: {}
 deploy:
