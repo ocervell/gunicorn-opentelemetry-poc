@@ -52,7 +52,4 @@ To change the configuration of the agent, refer to the configuration [documentat
     gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:latest
     kubectl apply -f k8s/locust_master_controller.yaml
     kubectl apply -f k8s/locust_master_service.yaml
-
-Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
-
     kubectl apply -f k8s/locust_worker_controller.yaml

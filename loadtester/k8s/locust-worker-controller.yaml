@@ -30,11 +30,11 @@ spec:
     spec:
       containers:
         - name: locust-worker
-          image: gcr.io/rnm-datadog-sd/locust-tasks:latest
+          image: gcr.io/rnm-monitoring-poc/loadtester:latest
           env:
             - name: LOCUST_MODE
               value: worker
             - name: LOCUST_MASTER
-              value: 35.187.80.116
+              value: locust-master
             - name: TARGET_HOST
-              value: http://35.195.30.228
+              value: http://flask-app-tutorial
