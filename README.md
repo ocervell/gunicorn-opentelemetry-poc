@@ -24,11 +24,75 @@ The architecture is as follows:
 
 ## Installation
 
-To deploy the services, run:
+### Create a GKE Cluster
 
-    skaffold run --default-repo=gcr.io/<PROJECT_ID> -p gcb
+Enable the container API:
 
-where &lt;PROJECT_ID> is the project that will run the Cloud Build jobs.
+```sh
+gcloud services enable container.googleapis.com
+```
+
+Create a GKE cluster:
+
+```sh
+gcloud container clusters create <CLUSTER_NAME> \
+  --enable-autoupgrade \
+  --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 \
+  --zone=<ZONE>
+```
+
+Verify that the cluster is up-and-running:
+
+```sh
+kubectl get nodes
+```
+
+### Enable Google Container Registry
+
+Enable Google Container Registry (GCR) on your GCP project:
+
+```sh
+gcloud services enable containerregistry.googleapis.com
+```
+
+and configure the `docker` CLI to authenticate to GCR:
+
+```sh
+gcloud auth configure-docker -q
+```
+
+### Build and deploy everything
+
+Install skaffold and run:
+
+    skaffold run --default-repo=gcr.io/[PROJECT_ID]
+
+where [PROJECT_ID] is your GCP project ID where you will push container images to.
+
+This command:
+
+-   builds the container images
+-   pushes them to GCR
+-   applies the `./kubernetes-manifests` deploying the application to
+    Kubernetes.
+
+**Troubleshooting:** If you get "No space left on device" error on Google
+Cloud Shell, you can build the images on Google Cloud Build: [Enable the
+Cloud Build
+API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
+then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
+
+### Observe the results
+
+Find the IP address of your application, then visit the application on your browser to confirm installation.
+
+    kubectl get service flask-app-tutorial
+
+**Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+causes load balancer to not to work even after getting an IP address. If you
+are seeing this, run `kubectl get service flask-app-tutorial -o=yaml | kubectl apply -f-`
+to trigger load balancer reconfiguration.
 
 The above command deploys the following services:
 

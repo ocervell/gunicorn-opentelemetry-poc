@@ -26,12 +26,13 @@ build:
     context: src/flask-app
   - image: loadtester
     context: src/loadtester
+  kaniko: {}
   tagPolicy:
     gitCommit: {}
 deploy:
   kubectl:
     manifests:
-    - ./kubernetes-manifests/**.yaml
+    - ./k8s/**.yaml
 profiles:
 # "gcb" profile allows building and pushing the images
 # on Google Container Builder without requiring docker
