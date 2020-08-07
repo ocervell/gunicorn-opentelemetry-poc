@@ -24,32 +24,16 @@ The architecture is as follows:
 
 ## Installation
 
-The installation steps below assumes you already have a running GKE cluster.
+To deploy the services, run:
 
-### Deploy the OpenTelemetry agent
+    skaffold run --default-repo=gcr.io/<PROJECT_ID> -p gcb
 
-    cd ops/opentelemetry
-    kubectl apply -f ot-agent.yaml
+where &lt;PROJECT_ID> is the project that will run the Cloud Build jobs.
 
-To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`'s `ConfigMap` resource.
+The above command deploys the following services:
 
-### Deploy the custom-metrics-example
-
-    cd custom-metrics-example
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest .
-    kubectl apply -f app.yaml
-
-### Build and deploy the gunicorn application
-
-    cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
-    kubectl apply -f app.yaml
-    kubectl apply -f service.yaml
-
-### Deploy the loadtester
-
-    cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:latest
-    kubectl apply -f k8s/locust_master_controller.yaml
-    kubectl apply -f k8s/locust_master_service.yaml
-    kubectl apply -f k8s/locust_worker_controller.yaml
+| Service                                                | Language       | Description                                                                                                                                    |
+| ------------------------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [custom-metrics-example](./src/custom-metrics-example) | Python         | Generates a custom metric named 'custom-metrics-example'                                                                                       |
+| [flask-app](./src/flask-app)                           | Python (Flask) | Simple Flask application with a single endpoint '/' instrumentized (metrics and traces) with the Flask extension for OpenTelemetry Python SDK. |
+| [loadtester](./src/loadtester)                         | Python         | Locust master / workers that generate a load on the Flask application in order to get frequent metric / trace writes.                          |
