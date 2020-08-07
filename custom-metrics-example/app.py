@@ -31,3 +31,4 @@ start_http_server(9090)
 while (True):
     time.sleep(5)
     custom_metric_example.labels(**staging_labels).inc()
+    print('Custom metric incremented.')

@@ -31,6 +31,7 @@ The installation steps below assumes you already have a running GKE cluster.
     cd flask-app
     gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
     kubectl apply -f app.yaml
+    kubectl apply -f service.yaml
 
 ### Deploy Prometheus and patch it with prometheus-to-sd
 

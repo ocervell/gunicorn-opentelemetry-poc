@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: custom-metrics-example
-          image: gcr.io/rnm-datadog-sd/custom-metrics-example:latest
+          image: gcr.io/rnm-monitoring-poc/custom-metrics-example:latest
           ports:
             - name: custom-metrics
               containerPort: 9090
