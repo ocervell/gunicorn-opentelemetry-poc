@@ -37,7 +37,7 @@ resource = get_aggregated_resources([GoogleCloudResourceDetector()])
 # Metrics
 metrics.set_meter_provider(MeterProvider(resource=resource))
 meter = metrics.get_meter(__name__, True)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
+metrics.get_meter_provider().start_pipeline(meter, exporter, 10)
 
 # Traces
 trace.set_tracer_provider(TracerProvider(resource=resource))

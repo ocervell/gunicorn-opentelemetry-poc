@@ -28,7 +28,7 @@ exporter = OpenCensusMetricsExporter(service_name="custom-metrics-example",
 
 metrics.set_meter_provider(MeterProvider())
 meter = metrics.get_meter(__name__)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
+metrics.get_meter_provider().start_pipeline(meter, exporter, 10)
 
 custom_metric_example = meter.create_metric(
     name="custom_metric_example",
