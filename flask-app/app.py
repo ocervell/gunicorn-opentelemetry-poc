@@ -24,8 +24,8 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.sdk.resources import get_aggregated_resources
-from opentelemetry.ext.opencensusexporter.metrics_exporter import OpenCensusMetricsExporter
-from opentelemetry.ext.opencensusexporter.trace_exporter import OpenCensusSpanExporter
+from opentelemetry.exporter.opencensus.metrics_exporter import OpenCensusMetricsExporter
+from opentelemetry.exporter.opencensus.trace_exporter import OpenCensusSpanExporter
 from gke_detector import GoogleCloudResourceDetector
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
 span_exporter = OpenCensusSpanExporter(service_name='flask-app-tutorial',

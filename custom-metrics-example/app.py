@@ -18,7 +18,7 @@ import os
 import time
 
 from opentelemetry import metrics
-from opentelemetry.ext.opencensusexporter.metrics_exporter import (
+from opentelemetry.exporter.opencensus.metrics_exporter import (
     OpenCensusMetricsExporter, )
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 
