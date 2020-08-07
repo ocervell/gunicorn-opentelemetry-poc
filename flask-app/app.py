@@ -56,14 +56,11 @@ metric_labels = {
     'kubernetes_pod_ip': os.getenv('POD_IP'),
     'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
 }
-requests_counter = meter.create_metric(
-    name='flask_app_hello_requests',
-    description='Hello requests count',
-    unit='1',
-    value_type=int,
-    metric_type=Counter,
-    label_keys=tuple(metric_labels.keys()),
-)
+requests_counter = meter.create_metric(name='flask_app_hello_requests',
+                                       description='Hello requests count',
+                                       unit='1',
+                                       value_type=int,
+                                       metric_type=Counter)
 
 # Flask application
 app = Flask(__name__)
