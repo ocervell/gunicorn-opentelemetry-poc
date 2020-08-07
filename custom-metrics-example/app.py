@@ -35,11 +35,10 @@ custom_metric_example = meter.create_metric(
     description="Example of custom metric sent with OC exporter",
     unit="1",
     value_type=int,
-    metric_type=Counter,
-    label_keys=("environment", ),
-)
+    metric_type=Counter)
 
 staging_labels = {"environment": "staging"}
 while (True):
     time.sleep(5)
     custom_metric_example.add(1, staging_labels)
+    print('Custom metric incremented.')
