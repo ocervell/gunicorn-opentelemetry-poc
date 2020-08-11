@@ -66,8 +66,6 @@ data:
                     - source_labels: [__meta_kubernetes_pod_container_port_name]
                       action: keep
                       regex: (.*-metrics)
-                    - action: labelmap
-                      regex: __meta_kubernetes_pod_label_(.+)
                     - source_labels: [__meta_kubernetes_namespace]
                       action: replace
                       target_label: kubernetes_namespace
@@ -83,6 +81,11 @@ data:
                     - source_labels: [__meta_kubernetes_pod_label_name]
                       action: replace
                       target_label: app
+
+                    # Converts all pod labels to metric labels.
+                    # Warning: can increase number of labels significantly !
+                    # - action: labelmap
+                    #   regex: __meta_kubernetes_pod_label_(.+)
     exporters:
         logging:
             loglevel: info
@@ -160,8 +163,8 @@ spec:
             memory: 100Mi
         ports:
         - containerPort: 55680 # Default OpenTelemetry receiver port.
-        - name: otel-metrics
-          containerPort: 8888  # Agent metrics.
+        - containerPort: 8888  # Agent metrics.
+          name: otel-metrics
         - containerPort: 55678 # OpenCensus receiver port.
           hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to <HOST_IP>:55678.
           protocol: TCP
