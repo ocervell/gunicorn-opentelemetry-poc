@@ -1,4 +1,4 @@
-# Copyright 2018 Google LLC
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +16,6 @@ apiVersion: skaffold/v1beta2
 kind: Config
 build:
   artifacts:
-  # image tags are relative; to specify an image repo (e.g. GCR), you
-  # must provide a "default repo" using one of the methods described
-  # here:
-  # https://skaffold.dev/docs/concepts/#image-repository-handling
   - image: custom-metrics-example
     context: src/custom-metrics-example
   - image: flask-app-tutorial
@@ -29,20 +25,13 @@ build:
   kaniko:
     cache: {}
   tagPolicy:
-    gitCommit: {}
+    gitCommit:
+      variant: AbbrevCommitSha
 deploy:
   kubectl:
     manifests:
     - ./k8s/**.yaml
 profiles:
-# "gcb" profile allows building and pushing the images
-# on Google Container Builder without requiring docker
-# installed on the developer machine. However, note that
-# since GCB does not cache the builds, each build will
-# start from scratch and therefore take a long time.
-#
-# This is not used by default. To use it, run:
-#     skaffold run -p gcb
 - name: gcb
   build:
     googleCloudBuild:
