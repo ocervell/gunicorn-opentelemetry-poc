@@ -21,12 +21,15 @@ from opentelemetry import metrics
 from opentelemetry.exporter.opencensus.metrics_exporter import (
     OpenCensusMetricsExporter, )
 from opentelemetry.sdk.metrics import Counter, MeterProvider
+from opentelemetry.sdk.resources import get_aggregated_resources
+from gke_detector import GoogleCloudResourceDetector
 
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
 exporter = OpenCensusMetricsExporter(service_name="custom-metrics-example",
                                      endpoint=OTEL_AGENT_ENDPOINT)
+resource = get_aggregated_resources([GoogleCloudResourceDetector()])
 
-metrics.set_meter_provider(MeterProvider())
+metrics.set_meter_provider(MeterProvider(resource=resource))
 meter = metrics.get_meter(__name__)
 metrics.get_meter_provider().start_pipeline(meter, exporter, 10)
 
@@ -37,8 +40,8 @@ custom_metric_example = meter.create_metric(
     value_type=int,
     metric_type=Counter)
 
-staging_labels = {"environment": "staging"}
+metric_labels = {'app': 'custom-metrics-example', 'environment': 'staging'}
 while (True):
     time.sleep(5)
-    custom_metric_example.add(1, staging_labels)
+    custom_metric_example.add(1, metric_labels)
     print('Custom metric incremented.')

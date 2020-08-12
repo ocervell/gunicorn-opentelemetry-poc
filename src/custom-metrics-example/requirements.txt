@@ -1,3 +1,4 @@
+requests
 opentelemetry-api
 opentelemetry-sdk
 #opentelemetry-ext-opencensusexporter
