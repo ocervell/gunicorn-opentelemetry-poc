@@ -8,17 +8,11 @@ In this design:
 
 -   `OpenTelemetry` agent is deployed as a `daemonset` and configured with:
 
+    -   A Prometheus `receiver` to scrape the `statsd-exporter` metrics (drop-in replacement for a full-fledged Prometheus instance).
+
     -   An OpenCensus `receiver` to receive the application custom metrics sent via the SDK.
 
-
--   `OpenTelemetry` collector is deployed as a `deployment` to achieve the two-tier architecture, and configured with:
-
-    -   A Prometheus `receiver` to scrape Prometheus exporters metrics (drop-in replacement for a full-fledged Prometheus instance).
-
-    -   An OpenCensus `receiver` to receive the metrics from the agent.
-
     -   A `Cloud Trace` and `Cloud Monitoring` `exporter` to ship metrics and traces to Cloud Operations.
-
 
 -   `OpenTelemetry SDK` for Python is used within the app and `OpenCensusMetricsExporter` and `OpenCensusSpanExporter` are configured to export custom metrics and spans to the OpenTelemetry agent.
 
@@ -30,38 +24,80 @@ The architecture is as follows:
 
 ## Installation
 
-The installation steps below assumes you already have a running GKE cluster.
+### Create a GKE Cluster
 
-### Deploy the OpenTelemetry agent and collector
+Enable the container API:
 
-    cd ops/opentelemetry
-    kubectl apply -f ot-agent.yaml
-    kubectl apply -f ot-collector.yaml
+```sh
+gcloud services enable container.googleapis.com
+```
 
-To change the configuration of the agent, refer to the configuration [documentation](https://opentelemetry.io/docs/collector/configuration/) and edit the `ot-agent.yaml`' or `ot-collector.yaml` `ConfigMap` resource.
+Create a GKE cluster:
 
-### Deploy the custom-metrics-example
+```sh
+gcloud container clusters create <CLUSTER_NAME> \
+  --enable-autoupgrade \
+  --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 \
+  --zone=<ZONE>
+```
 
-    cd custom-metrics-example
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest .
-    kubectl apply -f app.yaml
+Verify that the cluster is up-and-running:
 
-### Build and deploy the gunicorn application
+```sh
+kubectl get nodes
+```
 
-    cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
-    kubectl apply -f app.yaml
-    kubectl apply -f service.yaml
+### Enable Google Container Registry
 
-### Deploy the loadtester
+Enable Google Container Registry (GCR) on your GCP project:
 
-    cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:latest
-    kubectl apply -f k8s/locust_master_controller.yaml
-    kubectl apply -f k8s/locust_master_service.yaml
+```sh
+gcloud services enable containerregistry.googleapis.com
+```
 
-    # Get `LOCUST_MASTER` IP
-    kubectl get service/locust-master | awk '{print $4}' | tail -1
+and configure the `docker` CLI to authenticate to GCR:
 
-Set the `LOCUST_MASTER` env variable to the IP above in `k8s/locust_worker_controller.yaml` and apply it:
-    kubectl apply -f k8s/locust_worker_controller.yaml
+```sh
+gcloud auth configure-docker -q
+```
+
+### Build and deploy everything
+
+Install skaffold and run:
+
+    skaffold run --default-repo=gcr.io/[PROJECT_ID]
+
+where [PROJECT_ID] is your GCP project ID where you will push container images to.
+
+This command:
+
+-   builds the container images
+-   pushes them to GCR
+-   applies the `./kubernetes-manifests` deploying the application to
+    Kubernetes.
+
+**Troubleshooting:** If you get "No space left on device" error on Google
+Cloud Shell, you can build the images on Google Cloud Build: [Enable the
+Cloud Build
+API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
+then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
+
+### Observe the results
+
+Find the IP address of your application, then visit the application on your browser to confirm installation.
+
+    kubectl get service flask-app-tutorial
+
+**Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+causes load balancer to not to work even after getting an IP address. If you
+are seeing this, run `kubectl get service flask-app-tutorial -o=yaml | kubectl apply -f-`
+to trigger load balancer reconfiguration.
+
+The above command deploys the following services:
+
+| Service                                                | Language       | Description                                                                                                                                    |
+| ------------------------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [custom-metrics-example](./src/custom-metrics-example) | Python         | Generates a custom metric named 'custom-metrics-example'                                                                                       |
+| [flask-app](./src/flask-app)                           | Python (Flask) | Simple Flask application with a single endpoint '/' instrumentized (metrics and traces) with the Flask extension for OpenTelemetry Python SDK. |
+| [loadtester](./src/loadtester)                         | Python         | Locust master / workers that generate a load on the Flask application in order to get frequent metric / trace writes.                          |

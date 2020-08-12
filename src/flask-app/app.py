@@ -37,7 +37,7 @@ resource = get_aggregated_resources([GoogleCloudResourceDetector()])
 # Metrics
 metrics.set_meter_provider(MeterProvider(resource=resource))
 meter = metrics.get_meter(__name__, True)
-metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
+metrics.get_meter_provider().start_pipeline(meter, exporter, 10)
 
 # Traces
 trace.set_tracer_provider(TracerProvider(resource=resource))
@@ -46,16 +46,7 @@ trace.get_tracer_provider().add_span_processor(
 
 # Custom metrics
 pid = os.getpid()
-metric_labels = {
-    'pid': str(pid),
-    'app': 'flask-app',
-    'environment': 'staging',
-    'kubernetes_container_name': os.getenv('CONTAINER_NAME'),
-    'kubernetes_namespace': os.getenv('NAMESPACE'),
-    'kubernetes_pod_name': os.getenv('POD_NAME'),
-    'kubernetes_pod_ip': os.getenv('POD_IP'),
-    'kubernetes_host_ip': os.getenv('OTEL_AGENT_HOST')
-}
+metric_labels = {'pid': str(pid), 'app': 'flask-app', 'environment': 'staging'}
 requests_counter = meter.create_metric(name='flask_app_hello_requests',
                                        description='Hello requests count',
                                        unit='1',

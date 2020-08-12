@@ -1,4 +1,4 @@
-# Copyright 2015 Google Inc. All rights reserved.
+# Copyright 2020 Google Inc. All rights reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,20 +16,17 @@
 # Start with a base Python 3.7.2 image
 FROM python:3.7.2
 
-# Add the licenses for third party software and libraries
-ADD licenses /licenses
-
 # Add the external tasks directory into /tasks
-ADD locust-tasks /locust-tasks
+ADD . /loadtester
 
 # Install the required dependencies via pip
-RUN pip install -r /locust-tasks/requirements.txt
+RUN pip install -r /loadtester/requirements.txt
 
 # Expose the required Locust ports
 EXPOSE 5557 5558 8089
 
 # Set script to be executable
-RUN chmod 755 /locust-tasks/run.sh
+RUN chmod 755 /loadtester/run.sh
 
 # Start Locust using LOCUS_OPTS environment variable
-ENTRYPOINT ["/locust-tasks/run.sh"] 
+ENTRYPOINT ["/loadtester/run.sh"]

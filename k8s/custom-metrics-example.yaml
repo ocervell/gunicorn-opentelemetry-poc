@@ -1,32 +1,30 @@
----
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: flask-app-tutorial
+  name: custom-metrics-example
   labels:
-    name: flask-app-tutorial
+    name: custom-metrics-example
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: flask-app-tutorial
+      name: custom-metrics-example
   template:
     metadata:
-      name: flask-app-tutorial
+      name: custom-metrics-example
       labels:
-        name: flask-app-tutorial
+        name: custom-metrics-example
     spec:
       containers:
-        - name: flask-app-tutorial
-          image: gcr.io/rnm-monitoring-poc/flask-app:latest
+        - name: custom-metrics-example
+          image: custom-metrics-example
           ports:
-            - containerPort: 8080
             - containerPort: 55678
           resources:
             requests:
-              memory: 256Mi
+              memory: 64Mi
             limits:
-              memory: 512Mi
+              memory: 128Mi
           env:
             - name: DEBUG_MODE
               value: "1"
@@ -59,14 +57,3 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
-
-        - name: statsd-exporter
-          image: prom/statsd-exporter
-          args: ["--log.level=debug"]
-          imagePullPolicy: Always
-          ports:
-          - name: statsd-metrics
-            containerPort: 9102
-
-          - containerPort: 9125
-            protocol: UDP
