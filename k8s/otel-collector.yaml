@@ -20,7 +20,7 @@ data:
       queued_retry:
     exporters:
       logging:
-        loglevel: debug
+        loglevel: info
       stackdriver:
     extensions:
       health_check:
@@ -32,7 +32,7 @@ data:
           processors: [memory_limiter, batch, queued_retry]
           exporters: [logging, stackdriver]
         metrics:
-          receivers: [opencensus, prometheus]
+          receivers: [opencensus]
           processors: [memory_limiter]
           exporters: [logging, stackdriver]
 ---
