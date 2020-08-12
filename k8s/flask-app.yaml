@@ -18,11 +18,10 @@ spec:
     spec:
       containers:
         - name: flask-app-tutorial
-          image: gcr.io/rnm-monitoring-poc/flask-app:latest
+          image: flask-app-tutorial
           ports:
-            - name: flask-metrics
-              containerPort: 9090
             - containerPort: 8080
+            - containerPort: 55678
           resources:
             requests:
               memory: 256Mi

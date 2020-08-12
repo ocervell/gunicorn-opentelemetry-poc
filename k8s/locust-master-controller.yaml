@@ -31,12 +31,12 @@ spec:
     spec:
       containers:
         - name: locust-master
-          image: gcr.io/rnm-datadog-sd/locust-tasks:latest
+          image: loadtester
           env:
             - name: LOCUST_MODE
               value: master
             - name: TARGET_HOST
-              value: http://34.78.177.113/
+              value: http://flask-app-tutorial/
           ports:
             - name: loc-master-web
               containerPort: 8089

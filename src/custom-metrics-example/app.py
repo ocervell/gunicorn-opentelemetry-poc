@@ -24,11 +24,11 @@ from prometheus_client import start_http_server, Counter
 custom_metric_example = Counter(
     'custom_metric_example',
     'Example of custom metric sent with Prometheus client',
-    ['environment'],
+    ['app', 'environment'],
 )
-staging_labels = {'environment': 'staging'}
+metric_labels = {'app': 'custom-metrics-example', 'environment': 'staging'}
 start_http_server(9090)
 while (True):
     time.sleep(5)
-    custom_metric_example.labels(**staging_labels).inc()
+    custom_metric_example.labels(**metric_labels).inc()
     print('Custom metric incremented.')
