@@ -1,0 +1,122 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-conf
+  labels:
+    app: opentelemetry
+    component: otel-collector-conf
+data:
+  otel-collector-config: |
+    receivers:
+      opencensus:
+    processors:
+      batch:
+      memory_limiter:
+        ballast_size_mib: 500 # Same as --mem-ballast-size-mib CLI argument
+        limit_mib: 850        # 80% of maximum memory up to 2G
+        spike_limit_mib: 512  # 25% of limit up to 2G
+        check_interval: 5s
+      queued_retry:
+    exporters:
+      logging:
+        loglevel: debug
+      stackdriver:
+    extensions:
+      health_check:
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces:
+          receivers: [opencensus]
+          processors: [memory_limiter, batch, queued_retry]
+          exporters: [logging, stackdriver]
+        metrics:
+          receivers: [opencensus, prometheus]
+          processors: [memory_limiter]
+          exporters: [logging, stackdriver]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  ports:
+  - name: opencensus
+    port: 55678
+    targetPort: 55678
+  selector:
+    component: otel-collector
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  labels:
+    app: opentelemetry
+    component: otel-collector
+spec:
+  selector:
+    matchLabels:
+      app: opentelemetry
+      component: otel-collector
+  minReadySeconds: 5
+  progressDeadlineSeconds: 120
+  replicas: 1 #TODO - adjust this to your own requirements
+  template:
+    metadata:
+      labels:
+        app: opentelemetry
+        component: otel-collector
+    spec:
+      containers:
+      - command:
+          - "/otelcontribcol"
+          - "--config=/conf/otel-collector-config.yaml"
+          - "--mem-ballast-size-mib=500"
+        image: otel/opentelemetry-collector-contrib:0.7.0
+        name: otel-collector
+        resources:
+          limits:
+            cpu: 1500m
+            memory: 1500Mi
+          requests:
+            cpu: 400m
+            memory: 400Mi
+        ports:
+        - containerPort: 55680 # Default OpenTelemetry receiver port.
+        - containerPort: 8888  # Agent metrics.
+          name: otel-metrics
+        - containerPort: 55678 # OpenCensus receiver port.
+          hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to <HOST_IP>:55678.
+          protocol: TCP
+        volumeMounts:
+        - name: otel-collector-config-vol
+          mountPath: /conf
+#        - name: otel-collector-secrets
+#          mountPath: /secrets
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 13133 # Health Check extension default port.
+      volumes:
+        - configMap:
+            name: otel-collector-conf
+            items:
+              - key: otel-collector-config
+                path: otel-collector-config.yaml
+          name: otel-collector-config-vol
+#        - secret:
+#            name: otel-collector-secrets
+#            items:
+#              - key: cert.pem
+#                path: cert.pem
+#              - key: key.pem
+#                path: key.pem
