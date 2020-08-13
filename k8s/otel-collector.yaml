@@ -47,7 +47,7 @@ spec:
   ports:
   - name: opencensus
     port: 55678
-    targetPort: 55679  # expose on different port to avoid conflict with agent daemonset
+    targetPort: 55678  # expose on different port to avoid conflict with agent daemonset
   selector:
     component: otel-collector
 ---
