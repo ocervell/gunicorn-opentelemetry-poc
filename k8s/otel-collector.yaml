@@ -13,9 +13,9 @@ data:
     processors:
       batch:
       memory_limiter:
-        ballast_size_mib: 500 # Same as --mem-ballast-size-mib CLI argument
-        limit_mib: 850        # 80% of maximum memory up to 2G
-        spike_limit_mib: 512  # 25% of limit up to 2G
+        ballast_size_mib: 165 # Same as --mem-ballast-size-mib CLI argument
+        limit_mib: 400        # 80% of maximum memory up to 2G
+        spike_limit_mib: 20   # 25% of limit up to 2G
         check_interval: 5s
       queued_retry:
     exporters:
