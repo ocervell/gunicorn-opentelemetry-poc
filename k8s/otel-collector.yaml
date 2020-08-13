@@ -47,7 +47,7 @@ spec:
   ports:
   - name: opencensus
     port: 55678
-    targetPort: 55678
+    targetPort: 55679  # expose on different port to avoid conflict with agent daemonset
   selector:
     component: otel-collector
 ---
@@ -76,22 +76,21 @@ spec:
       - command:
           - "/otelcontribcol"
           - "--config=/conf/otel-collector-config.yaml"
-          - "--mem-ballast-size-mib=500"
+          - "--mem-ballast-size-mib=165"
         image: otel/opentelemetry-collector-contrib:0.7.0
         name: otel-collector
         resources:
           limits:
-            cpu: 1500m
-            memory: 1500Mi
+            cpu: 500m
+            memory: 500Mi
           requests:
-            cpu: 400m
-            memory: 400Mi
+            cpu: 100m
+            memory: 100Mi
         ports:
         - containerPort: 55680 # Default OpenTelemetry receiver port.
         - containerPort: 8888  # Agent metrics.
           name: otel-metrics
         - containerPort: 55678 # OpenCensus receiver port.
-          hostPort: 55678      # OpenCensus agent host receiving port = all apps can send metrics to <HOST_IP>:55678.
           protocol: TCP
         volumeMounts:
         - name: otel-collector-config-vol
