@@ -11,5 +11,5 @@ opentelemetry-sdk
 opentelemetry-instrumentation
 opentelemetry-ext-flask
 opentelemetry-ext-requests
-opentelemetry-exporter-cloud-trace
+opentelemetry-exporter-google-cloud
 prometheus-flask-exporter
