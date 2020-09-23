@@ -31,21 +31,3 @@ spec:
   selector:
     name: flask-app-tutorial
   sessionAffinity: None
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    name: statsd-exporter
-  name: statsd-exporter
-  namespace: default
-spec:
-  ports:
-    - name: statsd-metrics
-      protocol: TCP
-      port: 9102
-      targetPort: 9102
-  selector:
-    name: flask-app-tutorial
-  sessionAffinity: None
