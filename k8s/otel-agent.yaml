@@ -90,6 +90,26 @@ data:
         logging:
             loglevel: info
         stackdriver:
+          resource_mappings:
+          - source_type: global
+            target_type: k8s_container
+            label_mappings:
+              - source_key: contrib.opencensus.io/exporter/stackdriver/project_id
+                target_key: project_id
+                optional: true
+
+              - source_key: contrib.opencensus.io/exporter/stackdriver/location
+                target_key: location
+                optional: true
+
+              - source_key: contrib.opencensus.io/exporter/stackdriver/cluster_name
+                target_key: cluster_name
+                optional: true
+
+              - source_key: contrib.opencensus.io/exporter/stackdriver/generic_task/namespace
+                target_key: namespace_name
+                optional: true
+
     processors:
         batch:
         queued_retry:
