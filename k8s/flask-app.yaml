@@ -33,8 +33,9 @@ spec:
         - name: flask-app-tutorial
           image: flask-app-tutorial
           ports:
+            - name: flask-metrics
+              containerPort: 9090
             - containerPort: 8080
-            - containerPort: 55678
           resources:
             requests:
               memory: 256Mi
