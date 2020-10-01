@@ -6,7 +6,7 @@ application running on Google Kubernetes engine.
 ## Architectures
 Different branches correspond to different telemetry setup in order to accommodate different environments:
 
-### [OpenTelemetry Collector (Tier 1 setup)](/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent)
+### [OpenTelemetry Collector (Tier 1 setup)](https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent)
 
   * `gunicorn` application exporting framework metrics to `statsd-exporter`
 
@@ -22,7 +22,7 @@ Different branches correspond to different telemetry setup in order to accommoda
     * `opencensusreceiver` to scrape custom app metrics
     * `stackdriverexporter` to export metrics and traces to Cloud Operations API
 
-### [OpenTelemetry Collector (Tier 2 setup)](/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent-collector)
+### [OpenTelemetry Collector (Tier 2 setup)](https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent-collector)
 
   * `gunicorn` application exporting framework metrics to `statsd-exporter`
 
@@ -43,7 +43,7 @@ Different branches correspond to different telemetry setup in order to accommoda
     * `opencensusreceiver` to receive metrics from the daemonset
     * `stackdriverexporter` to export metrics and traces to Cloud Operations API
 
-### [OpenTelemetry SDK + Cloud Monitoring exporter](/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-sdk-cloudops)
+### [OpenTelemetry SDK + Cloud Monitoring exporter](https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-sdk-cloudops)
 
   * `gunicorn` application exporting framework metrics to `statsd-exporter`
 
@@ -54,9 +54,9 @@ Different branches correspond to different telemetry setup in order to accommoda
     * `opentelemetry-exporter-cloud-monitoring` to export metrics directly to Cloud Monitoring API
     * `opentelemetry-exporter-cloud-trace` to export traces directly to Cloud Trace API
 
-### [Prometheus SDK + Stackdriver Prometheus Sidecar + Cloud Trace exporter](/ocervell/gunicorn-opentelemetry-poc/tree/arch/prometheus)
+### [Prometheus SDK + Stackdriver Prometheus Sidecar + Cloud Trace exporter](https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/prometheus)
 
-  * `gunicorn` application not exporting framework metrics.
+  * `gunicorn` application not exporting framework metrics
 
 
   * `Flask` app configured with:
