@@ -1,0 +1,83 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-agent
+  labels:
+    app: opentelemetry
+    component: otel-agent
+spec:
+  mode: daemonset
+  image: custom-registry/image:tagname
+  serviceAccount: prometheus
+  config: |
+    receivers:
+        opencensus:
+        prometheus:
+            config:
+                scrape_configs:
+                - job_name: 'kubernetes-pods'
+                  scrape_interval: 10s
+                  kubernetes_sd_configs:
+                  - role: pod
+                    # select only pods on the same host as the agent to prevent
+                    # duplication of metrics
+                    selectors:
+                      - role: pod
+                        field: "spec.nodeName=${NODE_NAME}"
+                  relabel_configs:
+                    - source_labels: [__meta_kubernetes_pod_container_port_name]
+                      action: keep
+                      regex: (.*-metrics)
+                    - source_labels: [__meta_kubernetes_namespace]
+                      action: replace
+                      target_label: kubernetes_namespace
+                    - source_labels: [__meta_kubernetes_pod_name]
+                      action: replace
+                      target_label: kubernetes_pod_name
+                    - source_labels: [__meta_kubernetes_pod_container_name]
+                      action: replace
+                      target_label: kubernetes_container_name
+                    - source_labels: [__meta_kubernetes_pod_host_ip]
+                      action: replace
+                      target_label: kubernetes_pod_host_ip
+                    - source_labels: [__meta_kubernetes_pod_label_name]
+                      action: replace
+                      target_label: app
+
+                    # Converts all pod labels to metric labels.
+                    # Warning: can increase number of labels significantly !
+                    # - action: labelmap
+                    #   regex: __meta_kubernetes_pod_label_(.+)
+    exporters:
+        logging:
+            loglevel: info
+        stackdriver:
+    processors:
+        batch:
+        queued_retry:
+        memory_limiter:
+          ballast_size_mib: 165 # Same as --mem-ballast-size-mib CLI argument
+          limit_mib: 400        # 80% of maximum memory up to 2G
+          spike_limit_mib: 20   # 25% of limit up to 2G
+          check_interval: 5s
+        filter:
+          metrics:
+            include:
+              match_type: regexp
+              metric_names:
+                - otelcol_.*            # allow metrics from the OpenTelemetry collector
+                - flask_app.*           # allow metrics from Flask app
+                - custom_metric_example # allow metric from custom-metrics-example
+    extensions:
+        health_check:
+    service:
+        extensions: [health_check]
+        pipelines:
+            traces:
+                receivers: [opencensus]
+                processors: [memory_limiter, batch, queued_retry]
+                exporters: [stackdriver, logging]
+            metrics:
+                receivers: [prometheus, opencensus]
+                processors: [memory_limiter, filter]
+                exporters: [stackdriver, logging]

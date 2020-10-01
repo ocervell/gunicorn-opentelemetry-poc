@@ -63,6 +63,16 @@ and configure the `docker` CLI to authenticate to GCR:
 gcloud auth configure-docker -q
 ```
 
+### Deploy OpenTelemetry Operator CRD
+
+Deploy Cert Manager:
+
+    kubectl apply --validate=false -f https://github.com/jetstack/cert-manager/releases/download/v1.0.2/cert-manager.yaml
+
+Deploy OpenTelemetry operator CRD:
+
+    kubectl apply -f https://github.com/open-telemetry/opentelemetry-operator/releases/latest/download/opentelemetry-operator.yaml
+
 ### Build and deploy everything
 
 Install skaffold and run:
