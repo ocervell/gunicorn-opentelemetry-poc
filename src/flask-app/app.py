@@ -38,7 +38,21 @@ metrics.get_meter_provider().start_pipeline(meter, exporter, 5)
 # Traces
 trace.set_tracer_provider(TracerProvider())
 trace.get_tracer_provider().add_span_processor(
-    BatchExportSpanProcessor(span_exporter))
+    DatadogExportSpanProcessor(
+        DatadogSpanExporter(agent_url="http://localhost:8126",
+                            service="flask-app-tutorial")))
+
+# append Datadog format for propagation to and from Datadog instrumented services
+global_textmap = propagators.get_global_textmap()
+if isinstance(global_textmap,
+              propagators.composite.CompositeHTTPPropagator) and not any(
+                  isinstance(p, DatadogFormat)
+                  for p in global_textmap._propagators):
+    propagators.set_global_textmap(
+        propagators.composite.CompositeHTTPPropagator(
+            global_textmap._propagators + [DatadogFormat()]))
+else:
+    propagators.set_global_textmap(DatadogFormat())
 
 # Custom metrics
 metric_labels = {

@@ -1,5 +1,5 @@
 # Gunicorn (Flask) demo app
-### Instrumentation: OT SDK + Prometheus + Cloud Monitoring
+### Instrumentation: OT SDK + Datadog agent + Prometheus + Datadog
 
 This repository is a POC application to demonstrate OpenTelemetry instrumentation for a gunicorn application running on GKE, including framework metrics and traces as well as custom metrics and traces.
 
@@ -7,7 +7,8 @@ The metrics backend configured in this repository is Cloud Monitoring (ex Stackd
 
 This branch deploys a Prometheus-based monitoring setup:
 
--   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces directly to Cloud Monitoring.
+-   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces to Datadog agent.
+-   **Datadog agent** is used to receive metrics from OT SDK and forward them to Datadog API.
 -   **[Prometheus Flask exporter](https://github.com/rycus86/prometheus_flask_exporter)** is used to expose framework (gunicorn) metrics and custom metrics as a Prometheus scrape endpoint.
 -   **[Prometheus](https://prometheus.io/)** and **[stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar)** are deployed to scrape metrics from Prometheus exporters.
 -   **OpenTelemetry collector is NOT deployed.**
@@ -54,6 +55,9 @@ and configure the `docker` CLI to authenticate to GCR:
 ```sh
 gcloud auth configure-docker -q
 ```
+
+## Configure Datadog API key
+kubectl create secret generic datadog --from-literal api_key="<DATADOG_API_KEY>" --namespace="default"
 
 ### Build and deploy everything
 

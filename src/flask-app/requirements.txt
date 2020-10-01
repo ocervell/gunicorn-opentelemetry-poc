@@ -6,10 +6,9 @@ itsdangerous==1.1.0
 Jinja2>=2.10.1
 MarkupSafe==1.1.0
 werkzeug>=0.15.3
--e git+https://github.com/open-telemetry/opentelemetry-python.git@master#egg=opentelemetry-api&subdirectory=opentelemetry-api
--e git+https://github.com/open-telemetry/opentelemetry-python.git@master#egg=opentelemetry-sdk&subdirectory=opentelemetry-sdk
+pip install opentelemetry-api
+pip install opentelemetry-sdk
 opentelemetry-instrumentation
-opentelemetry-ext-flask
-opentelemetry-ext-requests
-opentelemetry-exporter-cloud-monitoring
-opentelemetry-exporter-cloud-trace
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-requests
+opentelemetry-exporter-datadog
