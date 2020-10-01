@@ -17,7 +17,8 @@ import os
 import logging
 import time
 import pprint
-from flask import Flask
+import random
+from flask import Flask, abort
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -25,7 +26,7 @@ from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
 from opentelemetry.sdk.metrics import Counter, MeterProvider
 from opentelemetry.exporter.cloud_monitoring import CloudMonitoringMetricsExporter
 from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-
+CHAOS_TARGET_PERCENT = int(os.environ.get('CHAOS_TARGET_PERCENT', '0'))
 span_exporter = CloudTraceSpanExporter()
 exporter = CloudMonitoringMetricsExporter(add_unique_identifier=True)
 
@@ -73,6 +74,11 @@ def hello():
     app.logger.info('Received hello request !')
     requests_counter.add(1, metric_labels)
     app.logger.debug('Counter was incremented.')
+    if CHAOS_TARGET_PERCENT != 0:
+        percent = random.randint(0, 100)
+        if percent <= CHAOS_TARGET_PERCENT:
+            status_code = random.randint(400, 500)
+            abort(status_code)
     return 'Hello World!'
 
 

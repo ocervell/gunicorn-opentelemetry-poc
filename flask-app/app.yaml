@@ -31,6 +31,9 @@ spec:
             - name: DEBUG_MODE
               value: "1"
 
+            - name: CHAOS_TARGET_PERCENT
+              value: "10"
+
             # Metric & resource labels
             - name: CONTAINER_NAME
               value: flask-app-tutorial
