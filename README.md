@@ -1,21 +1,23 @@
 # Gunicorn (Flask) demo app
 ### Instrumentation: Prometheus SDK + Prometheus + Cloud Monitoring
 
-This repository is a POC application to demonstrate OpenTelemetry instrumentation for a gunicorn application running on GKE, including framework metrics and traces as well as custom metrics and traces.
-
-The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying it should be straightforward to adapt this example to other metrics or trace backends.
-
-This branch deploys a Prometheus-based monitoring setup:
-
--   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces directly to Cloud Monitoring.
--   **[Prometheus Flask exporter](https://github.com/rycus86/prometheus_flask_exporter)** is used to expose framework (gunicorn) metrics and custom metrics as a Prometheus scrape endpoint.
--   **[Prometheus](https://prometheus.io/)** and **[stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar)** are deployed to scrape metrics from Prometheus exporters.
--   **OpenTelemetry collector is NOT deployed.**
--   **statsd-exporter is NOT deployed** because the Prometheus Flask exporter supports gunicorn multiprocessed setup.
-
 The architecture is as below:
 
 ![](architecture.png)
+
+**Architecture details:**
+
+* [`gunicorn`][] application not exporting framework metrics
+
+
+* [`Flask`][] app configured with:
+  * [`prometheus-flask-exporter`][] to expose Gunicorn metrics (multiprocessed) as a Prometheus scrape target
+  * [`opentelemetry-exporter-google-cloud`][] to export traces directly to Cloud Monitoring API
+
+
+* [`Prometheus`][] configured with:
+  * Configuration to scrape metrics from containers if k8s metric port name matches `*-metrics`.
+  * Sidecar `stackdriver-prometheus-sidecar` to convert and export metrics to Cloud Monitoring API.
 
 ## Installation
 
@@ -129,3 +131,11 @@ The metrics deployed by this setup in Cloud Monitoring should match the followin
     external.googleapis.com/prometheus/scrape_samples_post_metric_relabeling
     external.googleapis.com/prometheus/scrape_samples_scraped
     external.googleapis.com/prometheus/up
+
+
+[`Flask`]: https://github.com/pallets/flask
+[`gunicorn`]: https://github.com/benoitc/gunicorn
+[`Prometheus`]: https://github.com/prometheus/prometheus
+[`opentelemetry-exporter-google-cloud`]: https://github.com/GoogleCloudPlatform/opentelemetry-operations-python/tree/master/opentelemetry-exporter-google-cloud
+[`prometheus-flask-exporter`]: https://github.com/rycus86/prometheus_flask_exporter
+[`opencensusreceiver`]: https://github.com/open-telemetry/opentelemetry-collector/tree/master/receiver/opencensusreceiver
