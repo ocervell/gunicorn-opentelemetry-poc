@@ -103,7 +103,7 @@ spec:
         runAsUser: 0
       containers:
       - name: prometheus
-        image: quay.io/prometheus/prometheus:v2.6.0
+        image: quay.io/prometheus/prometheus:v2.21.0
         imagePullPolicy: Always
         args:
         - "--config.file=/etc/prometheus/config/prometheus.yaml"
