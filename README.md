@@ -1,4 +1,5 @@
-# Gunicorn Flask application with OpenTelemetry instrumentation
+# Gunicorn (Flask) application
+#### Instrumentation: OT SDK + OT Agent (Daemonset) + OT Agent (Deployment) + Cloud Monitoring
 
 This repository is a POC application to demonstrate OpenTelemetry instrumentation for a `gunicorn` application running on Google Kubernetes engine.
 
@@ -11,6 +12,10 @@ In this design:
     -   A Prometheus `receiver` to scrape the `statsd-exporter` metrics (drop-in replacement for a full-fledged Prometheus instance).
 
     -   An OpenCensus `receiver` to receive the application custom metrics sent via the SDK.
+
+-   `OpenTelemetry` agent is also deployed as a `deployment` and configured with:
+
+    -   An OpenCensus `receiver` to receive the application custom metrics sent by the `daemonset`.
 
     -   A `Cloud Trace` and `Cloud Monitoring` `exporter` to ship metrics and traces to Cloud Operations.
 
