@@ -23,7 +23,7 @@ from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
-from opentelemetry.sdk.metrics import Counter, MeterProvider
+from opentelemetry.sdk.metrics import Counter, MeterProvider, ValueRecorder
 from opentelemetry.sdk.resources import get_aggregated_resources
 from opentelemetry.exporter.opencensus.metrics_exporter import OpenCensusMetricsExporter
 from opentelemetry.exporter.opencensus.trace_exporter import OpenCensusSpanExporter
@@ -49,11 +49,18 @@ trace.get_tracer_provider().add_span_processor(
 # Custom metrics
 pid = os.getpid()
 metric_labels = {'pid': str(pid), 'app': 'flask-app', 'environment': 'staging'}
+metric_latency_labels = metric_labels.copy()
+metric_latency_labels.update({'http.method': 'GET', 'http.url': '/'})
 requests_counter = meter.create_metric(name='flask_app_hello_requests',
                                        description='Hello requests count',
                                        unit='1',
                                        value_type=int,
                                        metric_type=Counter)
+requests_latency = meter.create_metric(name="flask_app_hello_latency",
+                                       description="Hello requests latency",
+                                       unit="ms",
+                                       value_type=float,
+                                       metric_type=ValueRecorder)
 
 # Flask application
 app = Flask(__name__)
@@ -68,6 +75,7 @@ app.logger.info(f'Otel agent endpoint: {OTEL_AGENT_ENDPOINT}')
 
 @app.route("/")
 def hello():
+    start = time.time()
     app.logger.info('Received hello request !')
     requests_counter.add(1, metric_labels)
     app.logger.debug('Counter was incremented.')
@@ -75,7 +83,13 @@ def hello():
         percent = random.randint(0, 100)
         if percent <= CHAOS_TARGET_PERCENT:
             status_code = random.randint(400, 500)
+            latency = (time.time() - start) * 1000
+            metric_latency_labels['http.status_code'] = str(status_code)
+            requests_latency.record(latency, metric_latency_labels)
             abort(status_code)
+    latency = (time.time() - start) * 1000
+    metric_latency_labels['http.status_code'] = str(200)
+    requests_latency.record(latency, metric_latency_labels)
     return 'Hello World!'
 
 
