@@ -1,20 +1,20 @@
 # Gunicorn (Flask) demo app
 ### Instrumentation: OT SDK + Prometheus + Cloud Monitoring
 
-This repository is a POC application to demonstrate OpenTelemetry instrumentation for a gunicorn application running on GKE, including framework metrics and traces as well as custom metrics and traces.
-
-The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying it should be straightforward to adapt this example to other metrics or trace backends.
-
-This branch deploys a Prometheus-based monitoring setup:
-
--   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces directly to Cloud Monitoring.
--   **[Prometheus Flask exporter](https://github.com/rycus86/prometheus_flask_exporter)** is used to expose framework (gunicorn) metrics and custom metrics as a Prometheus scrape endpoint.
--   **[Prometheus](https://prometheus.io/)** and **[stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar)** are deployed to scrape metrics from Prometheus exporters.
--   **OpenTelemetry collector is NOT deployed.**
-
 The architecture is as below:
 
 ![](architecture.png)
+
+**Architecture details:**
+
+  * [`gunicorn`][] application exporting framework metrics to `statsd-exporter`
+
+
+  * [`Flask`][] app configured with:
+    * [`opentelemetry-python`][] SDK for custom metrics and traces
+    * [`opentelemetry-instrumentation-flask`][] for Flask framework integration (traces)
+    * [`opentelemetry-exporter-cloud-monitoring`][] to export metrics directly to Cloud Monitoring API
+    * [`opentelemetry-exporter-cloud-trace`][] to export traces directly to Cloud Trace API
 
 ## Installation
 
@@ -128,3 +128,12 @@ The metrics deployed by this setup in Cloud Monitoring should match the followin
     external.googleapis.com/prometheus/scrape_samples_post_metric_relabeling
     external.googleapis.com/prometheus/scrape_samples_scraped
     external.googleapis.com/prometheus/up
+
+
+[`Flask`]: https://github.com/pallets/flask
+[`gunicorn`]: https://github.com/benoitc/gunicorn
+[`Prometheus`]: https://github.com/prometheus/prometheus
+[`opentelemetry-python`]: https://github.com/open-telemetry/opentelemetry-python
+[`opentelemetry-instrumentation-flask`]: https://github.com/open-telemetry/opentelemetry-python/tree/master/instrumentation/opentelemetry-instrumentation-flask
+[`opentelemetry-exporter-cloud-monitoring`]: https://pypi.org/project/opentelemetry-exporter-cloud-monitoring/
+[`opentelemetry-exporter-cloud-trace`]: https://pypi.org/project/opentelemetry-exporter-cloud-trace/
