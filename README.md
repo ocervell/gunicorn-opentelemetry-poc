@@ -1,14 +1,15 @@
-# Gunicorn (Flask) demo  application
+# Gunicorn (Flask) demo app
 ### Instrumentation: OT SDK + Prometheus + Cloud Monitoring
 
 This repository is a POC application to demonstrate OpenTelemetry instrumentation for a gunicorn application running on GKE, including framework metrics and traces as well as custom metrics and traces.
 
 The metrics backend configured in this repository is Cloud Monitoring (ex Stackdriver), but modifying it should be straightforward to adapt this example to other metrics or trace backends.
 
-This branch deploys an agentless setup using the OpenTelemetry SDK:
+This branch deploys a Prometheus-based monitoring setup:
 
--   **OpenTelemetry SDK (Python)** is used to send traces directly to Cloud Monitoring and expose custom metrics to a Prometheus exporter.
--   **Prometheus** and `prometheus-to-sd` are deployed to scrape metrics from Prometheus exporters.
+-   **[OpenTelemetry SDK (Python)](https://github.com/open-telemetry/opentelemetry-python)** is used to send traces directly to Cloud Monitoring.
+-   **[Prometheus Flask exporter](https://github.com/rycus86/prometheus_flask_exporter)** is used to expose framework (gunicorn) metrics and custom metrics as a Prometheus scrape endpoint.
+-   **[Prometheus](https://prometheus.io/)** and **[stackdriver-prometheus-sidecar](https://github.com/Stackdriver/stackdriver-prometheus-sidecar)** are deployed to scrape metrics from Prometheus exporters.
 -   **OpenTelemetry collector is NOT deployed.**
 
 The architecture is as below:
@@ -17,37 +18,113 @@ The architecture is as below:
 
 ## Installation
 
-The installation steps below assumes you already have a running GKE cluster.
+### Create a GKE Cluster
 
-### Deploy the custom-metrics-example
+Enable the container API:
 
-    cd custom-metrics-example
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/custom-metrics-example:latest .
-    kubectl apply -f app.yaml
+```sh
+gcloud services enable container.googleapis.com
+```
 
-### Build and deploy the gunicorn application
+Create a GKE cluster:
 
-    cd flask-app
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT_ID>/flask-app:latest .
-    kubectl apply -f app.yaml
+```sh
+gcloud container clusters create <CLUSTER_NAME> \
+  --enable-autoupgrade \
+  --enable-autoscaling --min-nodes=3 --max-nodes=10 --num-nodes=5 \
+  --zone=<ZONE>
+```
 
-### Deploy Prometheus and patch it with prometheus-to-sd
+Verify that the cluster is up-and-running:
 
-    cd ops/prometheus/
+```sh
+kubectl get nodes
+```
+
+### Enable Google Container Registry
+
+Enable Google Container Registry (GCR) on your GCP project:
+
+```sh
+gcloud services enable containerregistry.googleapis.com
+```
+
+and configure the `docker` CLI to authenticate to GCR:
+
+```sh
+gcloud auth configure-docker -q
+```
+
+### Build and deploy everything
+
+Install skaffold and run:
+
+    skaffold run --default-repo=gcr.io/[PROJECT_ID]
+
+where [PROJECT_ID] is your GCP project ID where you will push container images to.
+
+This command:
+
+-   builds the container images
+-   pushes them to GCR
+-   applies the `./kubernetes-manifests` deploying the application to
+    Kubernetes.
+
+**Troubleshooting:** If you get "No space left on device" error on Google
+Cloud Shell, you can build the images on Google Cloud Build: [Enable the
+Cloud Build
+API](https://console.cloud.google.com/flows/enableapi?apiid=cloudbuild.googleapis.com),
+then run `skaffold run -p gcb --default-repo=gcr.io/[PROJECT_ID]` instead.
+
+
+### Patch Prometheus with prometheus-to-sd
+
+    cd k8s/
     kubectl apply -f prometheus.yaml
 
 Set the required variables in `.env` file, then:
 
     source .env
-    ./patch.sh
+    ./prometheus_patch.sh
 
-### Deploy the loadtester
+### Observe the results
 
-    cd loadtester
-    gcloud builds submit --tag=gcr.io/<YOUR_PROJECT>/loadtester:latest
-    kubectl apply -f k8s/locust_master_controller.yaml
-    kubectl apply -f k8s/locust_master_service.yaml
+Find the IP address of your application, then visit the application on your browser to confirm installation.
 
-Set the `LOCUST_MASTER` env variable in `k8s/locust_worker_controller.yaml` and apply it:
+    kubectl get service flask-app-tutorial
 
-    kubectl apply -f k8s/locust_worker_controller.yaml
+**Troubleshooting:** A Kubernetes bug (will be fixed in 1.12) combined with
+a Skaffold [bug](https://github.com/GoogleContainerTools/skaffold/issues/887)
+causes load balancer to not to work even after getting an IP address. If you
+are seeing this, run `kubectl get service flask-app-tutorial -o=yaml | kubectl apply -f-`
+to trigger load balancer reconfiguration.
+
+The above command deploys the following services:
+
+| Service                                                | Language       | Description                                                                                                                                    |
+| ------------------------------------------------------ | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| [custom-metrics-example](./src/custom-metrics-example) | Python         | Generates a custom metric named 'custom-metrics-example'                                                                                       |
+| [flask-app](./src/flask-app)                           | Python (Flask) | Simple Flask application with a single endpoint '/' instrumentized (metrics and traces) with the Flask extension for OpenTelemetry Python SDK. |
+| [loadtester](./src/loadtester)                         | Python         | Locust master / workers that generate a load on the Flask application in order to get frequent metric / trace writes.                          |
+
+The metrics deployed by this setup in Cloud Monitoring should match the following types:
+
+    external.googleapis.com/prometheus/custom_metric_example
+    external.googleapis.com/prometheus/flask_app_hello_requests
+    external.googleapis.com/prometheus/flask_exporter_info
+    external.googleapis.com/prometheus/flask_http_request
+    external.googleapis.com/prometheus/flask_http_request_duration_seconds
+    external.googleapis.com/prometheus/process_cpu_seconds
+    external.googleapis.com/prometheus/process_max_fds
+    external.googleapis.com/prometheus/process_open_fds
+    external.googleapis.com/prometheus/process_resident_memory_bytes
+    external.googleapis.com/prometheus/process_start_time_seconds
+    external.googleapis.com/prometheus/process_virtual_memory_bytes
+    external.googleapis.com/prometheus/python_gc_collections
+    external.googleapis.com/prometheus/python_gc_objects_collected
+    external.googleapis.com/prometheus/python_gc_objects_uncollectable
+    external.googleapis.com/prometheus/python_info
+    external.googleapis.com/prometheus/scrape_duration_seconds
+    external.googleapis.com/prometheus/scrape_samples_post_metric_relabeling
+    external.googleapis.com/prometheus/scrape_samples_scraped
+    external.googleapis.com/prometheus/up
