@@ -17,7 +17,8 @@ import os
 import logging
 import time
 import pprint
-from flask import Flask
+import random
+from flask import Flask, abort
 from opentelemetry import trace, metrics
 from opentelemetry.ext.flask import FlaskInstrumentor
 from opentelemetry.sdk.trace import TracerProvider
@@ -27,6 +28,7 @@ from opentelemetry.sdk.resources import get_aggregated_resources
 from opentelemetry.exporter.opencensus.metrics_exporter import OpenCensusMetricsExporter
 from opentelemetry.exporter.opencensus.trace_exporter import OpenCensusSpanExporter
 from gke_detector import GoogleCloudResourceDetector
+CHAOS_TARGET_PERCENT = int(os.environ.get('CHAOS_TARGET_PERCENT', '0'))
 OTEL_AGENT_ENDPOINT = os.environ['OTEL_AGENT_ENDPOINT']
 span_exporter = OpenCensusSpanExporter(service_name='flask-app-tutorial',
                                        endpoint=OTEL_AGENT_ENDPOINT)
@@ -69,6 +71,11 @@ def hello():
     app.logger.info('Received hello request !')
     requests_counter.add(1, metric_labels)
     app.logger.debug('Counter was incremented.')
+    if CHAOS_TARGET_PERCENT != 0:
+        percent = random.randint(0, 100)
+        if percent <= CHAOS_TARGET_PERCENT:
+            status_code = random.randint(400, 500)
+            abort(status_code)
     return 'Hello World!'
 
 

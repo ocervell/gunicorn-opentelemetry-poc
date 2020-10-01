@@ -44,6 +44,9 @@ spec:
             - name: DEBUG_MODE
               value: "1"
 
+            - name: CHAOS_TARGET_PERCENT
+              value: "10"
+
             # OTEL Agent host / ip
             - name: OTEL_AGENT_HOST
               valueFrom:
