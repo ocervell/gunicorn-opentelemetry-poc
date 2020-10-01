@@ -44,3 +44,6 @@ spec:
           env:
             - name: DEBUG_MODE
               value: "1"
+
+            - name: CHAOS_TARGET_PERCENT
+              value: "10"
