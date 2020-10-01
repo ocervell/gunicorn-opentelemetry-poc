@@ -1,5 +1,0 @@
-requests
-opentelemetry-api
-opentelemetry-sdk
-#opentelemetry-ext-opencensusexporter
--e git+https://github.com/aabmass/opentelemetry-python.git@fix-oc-exporter#egg=opentelemetry-exporter-opencensus&subdirectory=exporter/opentelemetry-exporter-opencensus
