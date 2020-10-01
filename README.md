@@ -1,6 +1,6 @@
 # Gunicorn (Flask) demo application
 
-#### Instrumentation: OT SDK + OT Agent + Cloud Monitoring
+#### Instrumentation: OT SDK + OT Agent + Cloud Monitoring & Datadog
 
 This repository is a POC application to demonstrate OpenTelemetry instrumentation for a `gunicorn` application running on Google Kubernetes engine.
 
