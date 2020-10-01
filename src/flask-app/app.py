@@ -58,6 +58,11 @@ requests_counter = meter.create_metric(
     metric_type=Counter,
     label_keys=tuple(metric_labels.keys()),
 )
+requests_latency = meter.create_metric(name="flask_app_hello_latency",
+                                       description="Hello requests latency",
+                                       unit="ms",
+                                       value_type=float,
+                                       metric_type=ValueRecorder)
 
 # Flask application
 app = Flask(__name__)
@@ -71,6 +76,7 @@ app.logger.setLevel(gunicorn_logger.level)
 
 @app.route("/")
 def hello():
+    start = time.time()
     app.logger.info('Received hello request !')
     requests_counter.add(1, metric_labels)
     app.logger.debug('Counter was incremented.')
@@ -78,7 +84,13 @@ def hello():
         percent = random.randint(0, 100)
         if percent <= CHAOS_TARGET_PERCENT:
             status_code = random.randint(400, 500)
+            latency = (time.time() - start) * 1000
+            metric_latency_labels['http.status_code'] = str(status_code)
+            requests_latency.record(latency, metric_latency_labels)
             abort(status_code)
+    latency = (time.time() - start) * 1000
+    metric_latency_labels['http.status_code'] = str(200)
+    requests_latency.record(latency, metric_latency_labels)
     return 'Hello World!'
 
 

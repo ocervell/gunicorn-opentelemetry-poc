@@ -1,0 +1,65 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: flask-app-tutorial
+  labels:
+    name: flask-app-tutorial
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: flask-app-tutorial
+  template:
+    metadata:
+      name: flask-app-tutorial
+      labels:
+        name: flask-app-tutorial
+    spec:
+      containers:
+        - name: flask-app-tutorial
+          image: flask-app-tutorial
+          ports:
+            - containerPort: 8080
+            - containerPort: 55678
+          resources:
+            requests:
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          env:
+            - name: DEBUG_MODE
+              value: "1"
+
+            - name: CHAOS_TARGET_PERCENT
+              value: "10"
+
+            # Metric & resource labels
+            - name: CONTAINER_NAME
+              value: flask-app-tutorial
+
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            - name: POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+
+        - name: statsd-exporter
+          image: prom/statsd-exporter
+          args: ["--log.level=debug"]
+          imagePullPolicy: Always
+          ports:
+          - name: statsd-metrics
+            containerPort: 9102
+
+          - containerPort: 9125
+            protocol: UDP

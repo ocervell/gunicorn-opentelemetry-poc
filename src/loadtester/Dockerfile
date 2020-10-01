@@ -12,29 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
-metadata:
-  name: locust-worker
-  labels:
-    name: locust-worker
-spec:
-  replicas: 5
-  selector:
-    matchLabels:
-      app: locust-worker
-  template:
-    metadata:
-      labels:
-        app: locust-worker
-    spec:
-      containers:
-        - name: locust-worker
-          image: gcr.io/rnm-datadog-sd/locust-tasks:latest
-          env:
-            - name: LOCUST_MODE
-              value: worker
-            - name: LOCUST_MASTER
-              value: 35.187.80.116
-            - name: TARGET_HOST
-              value: http://35.195.30.228
+
+# Start with a base Python 3.7.2 image
+FROM python:3.7.2
+
+# Add the licenses for third party software and libraries
+ADD licenses /licenses
+
+# Add the external tasks directory into /tasks
+ADD . /loadtester
+
+# Install the required dependencies via pip
+RUN pip install -r /loadtester/requirements.txt
+
+# Expose the required Locust ports
+EXPOSE 5557 5558 8089
+
+# Set script to be executable
+RUN chmod 755 /loadtester/run.sh
+
+# Start Locust using LOCUS_OPTS environment variable
+ENTRYPOINT ["/loadtester/run.sh"]

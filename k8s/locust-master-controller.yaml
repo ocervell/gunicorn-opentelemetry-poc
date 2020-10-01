@@ -11,10 +11,9 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-
-apiVersion: "extensions/v1beta1"
-kind: "Deployment"
+---
+apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: locust-master
   labels:
@@ -31,12 +30,12 @@ spec:
     spec:
       containers:
         - name: locust-master
-          image: gcr.io/rnm-datadog-sd/locust-tasks:latest
+          image: loadtester
           env:
             - name: LOCUST_MODE
               value: master
             - name: TARGET_HOST
-              value: http://34.78.177.113/
+              value: http://flask-app-tutorial/
           ports:
             - name: loc-master-web
               containerPort: 8089
