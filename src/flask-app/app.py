@@ -28,9 +28,6 @@ CHAOS_ERROR_CODES = list(default_exceptions.keys())
 
 # Flask application
 app = Flask(__name__)
-app_tags = [
-    'app:flask-app', 'service:flask-app', 'env:staging', 'version:1.0.0'
-]
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -39,7 +36,7 @@ app.logger.setLevel(gunicorn_logger.level)
 
 
 @app.route("/")
-@instrument('flask_app_hello_requests', app_tags)
+@instrument('flask_app_hello_requests')
 def hello():
     start = time.time()
     app.logger.info('Received hello request !')

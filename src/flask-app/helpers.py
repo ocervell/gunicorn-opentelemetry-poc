@@ -18,10 +18,11 @@ from functools import wraps
 from time import time
 from flask import request
 
-from datadog import initialize, statsd
+from datadog import initialize, statsd, util
 
 STATSD_HOST = os.environ.get('STATSD_HOST', 'localhost')
 STATSD_PORT = int(os.environ.get('STATSD_PORT', '8125'))
+HOSTNAME = util.hostname.get_hostname(None)
 initialize({'statsd_host': STATSD_HOST, 'statsd_port': STATSD_PORT})
 
 
@@ -55,11 +56,12 @@ def instrument(metric, tags=[]):
                     f'http.status_code:{status_code}',
                     f'http.status_code_class:{status_code_class}',
                     f'http.path:{request.path}',
-                    f'http.method:{request.method}'
+                    f'http.method:{request.method}',
+                    f'hostname:{HOSTNAME}',
                 ]
                 req_tags = tags.copy()
                 req_tags.extend(http_tags)
-                # print(req_tags)
+                print(req_tags)
                 latency = (time() - start) * 1000
                 statsd.histogram(f'{metric}.latency', latency, tags=req_tags)
                 statsd.increment(f'{metric}.count', tags=req_tags)
