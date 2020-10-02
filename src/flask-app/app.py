@@ -19,31 +19,16 @@ import time
 import pprint
 import random
 from flask import Flask, abort
-from opentelemetry import trace, metrics
-from opentelemetry.ext.flask import FlaskInstrumentor
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchExportSpanProcessor
-from opentelemetry.sdk.metrics import Counter, MeterProvider
-from opentelemetry.exporter.cloud_trace import CloudTraceSpanExporter
-from prometheus_flask_exporter.multiprocess import GunicornPrometheusMetrics
+from werkzeug.exceptions import default_exceptions
+import time
+import random
+from helpers import instrument
 CHAOS_TARGET_PERCENT = int(os.environ.get('CHAOS_TARGET_PERCENT', '0'))
-span_exporter = CloudTraceSpanExporter()
-
-# Traces
-trace.set_tracer_provider(TracerProvider())
-trace.get_tracer_provider().add_span_processor(
-    BatchExportSpanProcessor(span_exporter))
+CHAOS_ERROR_CODES = list(default_exceptions.keys())
 
 # Flask application
 app = Flask(__name__)
-FlaskInstrumentor().instrument_app(app)
-metrics = GunicornPrometheusMetrics(app)
-
-# Custom metrics
-metric_labels = {'app': 'flask-app', 'environment': 'staging'}
-requests_counter = metrics.counter('flask_app_hello_requests',
-                                   'Hello requests count',
-                                   labels=metric_labels)
+app_tags = ['app:flask-app', 'environment:staging']
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
@@ -52,14 +37,15 @@ app.logger.setLevel(gunicorn_logger.level)
 
 
 @app.route("/")
-@requests_counter
+@instrument('flask_app_hello_requests', app_tags)
 def hello():
+    start = time.time()
     app.logger.info('Received hello request !')
     app.logger.debug('Counter was incremented.')
     if CHAOS_TARGET_PERCENT != 0:
         percent = random.randint(0, 100)
         if percent <= CHAOS_TARGET_PERCENT:
-            status_code = random.randint(400, 500)
+            status_code = random.choice(CHAOS_ERROR_CODES)
             abort(status_code)
     return 'Hello World!'
 
