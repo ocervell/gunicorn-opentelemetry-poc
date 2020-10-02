@@ -61,7 +61,7 @@ def instrument(metric, tags=[]):
                 req_tags.extend(http_tags)
                 print(req_tags)
                 latency = (time() - start) * 1000
-                statsd.distribution(f'{metric}.latency',
+                statsd.distribution(f'{metric}.latency.distribution',
                                     latency,
                                     tags=req_tags)
                 statsd.increment(f'{metric}.count', tags=req_tags)
