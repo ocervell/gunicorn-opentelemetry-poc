@@ -383,6 +383,10 @@ spec:
               value: 0.50 0.75 0.90 0.99 0.999
             - name: DD_DOGSTATSD_NON_LOCAL_TRAFFIC
               value: "true"
+
+            # GCP
+            - name: DD_CHECK_RUNNERS
+              value: "16"
             - name: DD_KUBELET_TLS_VERIFY
               value: "false"
           volumeMounts:
