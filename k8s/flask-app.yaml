@@ -18,6 +18,9 @@ metadata:
   name: flask-app-tutorial
   labels:
     name: flask-app-tutorial
+    tags.datadoghq.com/env: "staging"
+    tags.datadoghq.com/service: "flask-app"
+    tags.datadoghq.com/version: "1.0.0"
 spec:
   replicas: 1
   selector:
@@ -28,6 +31,9 @@ spec:
       name: flask-app-tutorial
       labels:
         name: flask-app-tutorial
+        tags.datadoghq.com/env: "staging"
+        tags.datadoghq.com/service: "flask-app"
+        tags.datadoghq.com/version: "1.0.0"
     spec:
       containers:
         - name: flask-app-tutorial
@@ -47,3 +53,18 @@ spec:
 
             - name: CHAOS_TARGET_PERCENT
               value: "10"
+
+            - name: DD_ENV
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/env']
+
+            - name: DD_SERVICE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/service']
+
+            - name: DD_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['tags.datadoghq.com/version']
