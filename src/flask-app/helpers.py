@@ -22,7 +22,6 @@ from datadog import initialize, statsd, util
 
 STATSD_HOST = os.environ.get('STATSD_HOST', 'localhost')
 STATSD_PORT = int(os.environ.get('STATSD_PORT', '8125'))
-HOSTNAME = util.hostname.get_hostname(None)
 initialize({'statsd_host': STATSD_HOST, 'statsd_port': STATSD_PORT})
 
 
@@ -57,7 +56,6 @@ def instrument(metric, tags=[]):
                     f'http.status_code_class:{status_code_class}',
                     f'http.path:{request.path}',
                     f'http.method:{request.method}',
-                    f'hostname:{HOSTNAME}',
                 ]
                 req_tags = tags.copy()
                 req_tags.extend(http_tags)

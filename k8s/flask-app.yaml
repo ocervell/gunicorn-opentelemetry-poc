@@ -54,6 +54,19 @@ spec:
             - name: CHAOS_TARGET_PERCENT
               value: "10"
 
+            - name: DD_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+
+            - name: DD_TRACE_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+
+            - name: DD_PROFILING_ENABLED
+              value: "true"
+
             - name: DD_ENV
               valueFrom:
                 fieldRef:
@@ -68,3 +81,6 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.labels['tags.datadoghq.com/version']
+
+            - name: DATADOG_TRACE_ENABLE
+              value: "true"

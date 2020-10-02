@@ -5,4 +5,4 @@ ADD requirements.txt /app/requirements.txt
 RUN pip install -r /app/requirements.txt
 ADD . /app
 ENV PORT 8080
-CMD ["gunicorn", "app:app", "--config=config.py", "--log-level=debug", "--capture-output"]
+CMD ["ddtrace-run", "gunicorn", "app:app", "--config=config.py", "--log-level=debug", "--capture-output"]

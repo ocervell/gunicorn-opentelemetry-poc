@@ -22,15 +22,3 @@ DEBUG_MODE = int(env.get("DEBUG_MODE", 1))
 bind = ":" + str(PORT)
 workers = multiprocessing.cpu_count() * 2 + 1
 threads = 2 * multiprocessing.cpu_count()
-
-# Prometheus Flask exporter
-env['prometheus_multiproc_dir'] = '/tmp'
-from prometheus_flask_exporter.multiprocess import GunicornPrometheusMetrics
-
-
-def when_ready(server):
-    GunicornPrometheusMetrics.start_http_server_when_ready(9090)
-
-
-def child_exit(server, worker):
-    GunicornPrometheusMetrics.mark_process_dead_on_child_exit(worker.pid)
