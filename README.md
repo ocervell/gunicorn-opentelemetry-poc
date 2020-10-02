@@ -58,6 +58,11 @@ and configure the `docker` CLI to authenticate to GCR:
 gcloud auth configure-docker -q
 ```
 
+## Create Datadog secret
+```
+kubectl create secret generic datadog-agent --from-literal api-key="<DATADOG_API_KEY>" --namespace="default"
+```
+
 ### Build and deploy everything
 
 Install skaffold and run:
