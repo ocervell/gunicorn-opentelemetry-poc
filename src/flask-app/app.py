@@ -28,7 +28,9 @@ CHAOS_ERROR_CODES = list(default_exceptions.keys())
 
 # Flask application
 app = Flask(__name__)
-app_tags = ['app:flask-app', 'environment:staging']
+app_tags = [
+    'app:flask-app', 'service:flask-app', 'env:staging', 'version:1.0.0'
+]
 
 # Logging setup
 gunicorn_logger = logging.getLogger('gunicorn.error')
