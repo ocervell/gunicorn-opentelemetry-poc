@@ -12,9 +12,10 @@ Different branches correspond to different telemetry setup in order to accommoda
 | OpenTelemetry Collector (Tier 2 setup)                                 | [arch/otel-agent-collector][] |
 | OpenTelemetry SDK + Cloud Monitoring exporter                          | [arch/otel-sdk-cloudops][]    |
 | Prometheus SDK + Stackdriver Prometheus Sidecar + Cloud Trace exporter | [arch/prometheus][]           |
+| Datadog SDK + datadog-agent                                            | [feature/datadog][]           |
 
 [arch/otel-agent]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent
 [arch/otel-agent-collector]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent-collector
 [arch/otel-sdk-cloudops]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-sdk-cloudops
 [arch/prometheus]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/prometheus
-[feature/datadog]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/feature/datadog [alpha]
+[feature/datadog]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/feature/datadog
