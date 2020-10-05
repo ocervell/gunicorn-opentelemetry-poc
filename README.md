@@ -17,3 +17,4 @@ Different branches correspond to different telemetry setup in order to accommoda
 [arch/otel-agent-collector]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-agent-collector
 [arch/otel-sdk-cloudops]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/otel-sdk-cloudops
 [arch/prometheus]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/arch/prometheus
+[feature/datadog]: https://github.com/ocervell/gunicorn-opentelemetry-poc/tree/feature/datadog [alpha]
